@@ -7,16 +7,20 @@ class Symbol():
         return self._string
 
 
-class T():
+from .utils import Singleton
+
+
+class T(Singleton):
     pass
 
 
-class F():
+class F(Singleton):
     pass
 
 
-class Nil():
+class Nil(Singleton):
     pass
+
 
 t = T()
 f = F()
