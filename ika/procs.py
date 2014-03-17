@@ -1,5 +1,4 @@
-from numpy import array
-from .struct import t, f
+from .struct import t, f, empty
 
 
 def is_true(atom):
@@ -16,13 +15,8 @@ def is_false(atom):
         return f
 
 
-def cons(x, y):
-    return array([x, y])
-
-
-def car(x):
-    return array[0]
-
-
-def cdr(x):
-    return array[1]
+def is_null(atom):
+    if atom is empty:
+        return t
+    else:
+        return f

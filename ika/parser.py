@@ -1,7 +1,7 @@
 from .procs import cons
-from .struct import Symbol, nil
+from .struct import Symbol, empty
 
 
 def parser(lexed):
-    exp = cons(nil, nil)
+    exp = empty
     return exp

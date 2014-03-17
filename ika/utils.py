@@ -7,11 +7,19 @@ class Singleton(object):
                 cls, *args, **kwargs)
         return cls._instance
 
-from procs import car, cdr
-from struct import nil
+from .procs import cons, car, cdr
+from .struct import empty
 
 
 def cons_iter(x):
-    while x is not nil:
+    while x is not empty:
         yield car(x)
         cdr(x)
+
+
+def cons_convert(li, i=0):
+    if not li:
+        return empty
+    elif i == len(li):
+        return empty
+    return cons(li[i], cons_convert(li, i+1))
