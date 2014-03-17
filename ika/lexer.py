@@ -1,26 +1,37 @@
 import re
+from functools import reduce
+
 token_patterns = [
     r"\(",
     r"\)",
     r"`\(",  # quote
     r"#\(",  # vector
-    "\"[^\"]\"",  # string
-    "\'[^\']\'",  # string TODO: \"
-    r"\w+",  # name
+    "\"(\\\\\"|[^\"])*\"",  # string
+    "'(\\\\\'|[^'])*'",  # string
+    "[^(\\\)|\"|\s)]+",  # name
 ]
 
 token_re = list(map(re.compile, token_patterns))  # compile patterns.
 space_re = re.compile(r"^\s+")
 
 
-def lexer(string):
-    lexed = []  # result
+def token_gen(string):
     while string:
         string = space_re.sub("", string)  # remove space.
+        match = None
         for re_obj in token_re:
             match = re_obj.match(string)
-            if match:
-                lexed.append(string[:match.end()])
+            if match is not None:
+                yield string[:match.end()]
                 string = string[match.end():]
                 break
-    return lexed
+        if match is None:
+            raise SyntaxError("Can't recognize token: %s" % string)
+
+
+def lexer(string):
+    def add(li, token):
+        li.append(token)
+        return li
+
+    return reduce(add, token_gen(string), [])
