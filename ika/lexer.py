@@ -4,7 +4,12 @@ from functools import reduce
 token_patterns = [  # TODO: ,() '() #() ,@()
     r"\(",
     r"\)",
-    r"`\(",  # quote
+
+    r"'\(",  # quote
+    r"`\(",
+    r",\(",
+    r",@\(",
+
     r"#\(",  # vector
     "\"(\\\\\"|[^\"])*\"",  # string
     "[^(\\\)|\"|\s)]+",  # name
@@ -32,5 +37,4 @@ def lexer(string):
     def add(li, token):
         li.append(token)
         return li
-
     return reduce(add, token_gen(string), [])

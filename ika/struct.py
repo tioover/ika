@@ -1,6 +1,16 @@
-class ReprMixin:
-    def __repr__(self):
-        return str(self)
+class Singleton():
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Singleton, cls).__new__(
+                cls, *args, **kwargs)
+        return cls._instance
+
+
+class ReprMixin():
+    def __str__(self):
+        return repr(self)
 
 
 class Symbol():
@@ -12,11 +22,8 @@ class Symbol():
         return self._string
 
 
-from .utils import Singleton
-
-
 class T(ReprMixin, Singleton):
-    def __str__(self):
+    def __repr__(self):
         "#t"
 
     def __bool__(self):
@@ -24,7 +31,7 @@ class T(ReprMixin, Singleton):
 
 
 class F(ReprMixin, Singleton):
-    def __str__(self):
+    def __repr__(self):
         "#f"
 
     def __bool__(self):
@@ -32,8 +39,8 @@ class F(ReprMixin, Singleton):
 
 
 class EmptyList(ReprMixin, Singleton):
-    def __str__(self):
-        return "()"
+    def __repr__(self):
+        return "`()"
 
 t = T()
 f = F()
@@ -45,13 +52,19 @@ class Pair(ReprMixin):
         self.car = car
         self.cdr = cdr
 
-    def __str__(self):
-        string = "(%s " % str(self.car)
-        if type(self.cdr) is Pair:
-            string += str(self.cdr)[1:]
+    def __repr__(self):
+        if type(self.car) is str:
+            car_str = "\"%s\"" % repr(self.car)[1:-1]
         else:
-            string += ". %)" % str(self.cdr)
-        return "(%s)"
+            car_str = repr(self.car)
+
+        if type(self.cdr) is Pair:
+            string = "(%s %s" % (car_str, repr(self.cdr)[1:])
+        elif self.cdr is empty:
+            string = "(%s)" % car_str
+        else:
+            string += "(%s . %s)" % (car_str, repr(self.cdr))
+        return string
 
 
 def cons(x, y):
