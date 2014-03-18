@@ -1,44 +1,47 @@
 from .struct import Pair
-from .const import transfrom, TEMP
+from .const import transfrom
 
 
-def convert_tree(lexed, i=0, end=False):
+def convert_tree(lexed, cursor=0, end=False):
     '''
     lexed : List from lexer.
-    i : Position cursor for lexed.
+    cursor : Position cursor for lexed.
     end : A flag, if True, stack is empty.
     return value : head of pair list.
     '''
-    prev = TEMP  # a temp pair, simpily program struct.
+    head = Pair(None)  # a temp pair, simpily program struct.
+    prev = head
 
-    while i < len(lexed):
-        token = lexed[i]
+    while cursor < len(lexed):
+        token = lexed[cursor]
 
         if token == '(':
             # Push stack.
-            subtree, i = convert_tree(lexed, i+1)
+            subtree, cursor = convert_tree(lexed, cursor+1)
             prev.append(subtree)
 
         elif token == ')':
             if end:  # Stack empty, can't pop.
                 raise SyntaxError("Brackets \")\" do not match pair.")
             # Pop stack.
-            return TEMP.cdr, i
+            return head.cdr, cursor
 
         elif token in transfrom:
-            subtree, i = convert_tree(lexed, i+1)
+            subtree, cursor = convert_tree(lexed, cursor+1)
             prev.append(Pair(transfrom[token], Pair(subtree)))
+
         elif token == '.':
-            i += 1
-            prev.cdr = lexed[i]
+            cursor += 1
+            prev.cdr = lexed[cursor]
+
         else:
             prev.append(token)
         prev = prev.cdr
-        i += 1
+        cursor += 1
 
     if not end:  # Stack not empty.
         raise SyntaxError("Brackets \"(\" do not match pair.")
-    return TEMP.cdr
+    return head.cdr
 
 
 def parser(lexed):

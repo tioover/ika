@@ -66,7 +66,7 @@ class Pair(ReprMixin):
         elif self.cdr is empty:
             string = "(%s)" % car_str
         else:
-            string += "(%s . %s)" % (car_str, repr(self.cdr))
+            string = "(%s . %s)" % (car_str, repr(self.cdr))  # little bug.
         return string
 
 

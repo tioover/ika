@@ -6,7 +6,7 @@ token_patterns = [
     "(",
     ")",
 ]
-token_patterns.extend(transfrom.keys)
+token_patterns.extend(transfrom.keys())
 token_patterns = list(map(re.escape, token_patterns))  # escape for re.
 token_patterns.extend(  # complex re expr, can't escape.
     [
