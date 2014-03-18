@@ -4,10 +4,14 @@ from .const import transfrom
 
 def convert_tree(lexed, cursor=0, end=False):
     '''
-    lexed : List from lexer.
-    cursor : Position cursor for lexed.
-    end : A flag, if True, stack is empty.
-    return value : head of pair list.
+    lexed :
+        List from lexer.
+    cursor :
+        Position cursor for lexed.
+    end :
+        A flag, if True, stack is empty.
+    return value :
+        head of pair list.
     '''
     head = Pair(None)  # a temp pair, simpily program struct.
     prev = head
@@ -27,8 +31,14 @@ def convert_tree(lexed, cursor=0, end=False):
             return head.cdr, cursor
 
         elif token in transfrom:
-            subtree, cursor = convert_tree(lexed, cursor+1)
-            prev.append(Pair(transfrom[token], Pair(subtree)))
+            content = None
+            if lexed[cursor+1] == '(':
+                content, cursor = convert_tree(lexed, cursor+2)
+                content = Pair(content)
+            else:
+                cursor += 1
+                content = lexed[cursor]
+            prev.append(Pair(transfrom[token], content))
 
         elif token == '.':
             cursor += 1
@@ -36,6 +46,7 @@ def convert_tree(lexed, cursor=0, end=False):
 
         else:
             prev.append(token)
+
         prev = prev.cdr
         cursor += 1
 

@@ -1,12 +1,13 @@
 import re
 from functools import reduce
-from .const import transfrom
+from .const import token_str
 
 token_patterns = [
     "(",
     ")",
+    "#("
 ]
-token_patterns.extend(transfrom.keys())
+token_patterns.extend(token_str)
 token_patterns = list(map(re.escape, token_patterns))  # escape for re.
 token_patterns.extend(  # complex re expr, can't escape.
     [
@@ -18,6 +19,11 @@ token_patterns.extend(  # complex re expr, can't escape.
 # compile patterns.
 token_re = list(map(re.compile, token_patterns))
 space_re = re.compile(r"^\s+")
+
+
+replace = {
+    "#(": ["(", "vector"],
+}
 
 
 def token_gen(string):
@@ -36,6 +42,9 @@ def token_gen(string):
 
 def lexer(string):
     def add(li, token):
-        li.append(token)
+        if token in replace:
+            li.extend(replace[token])
+        else:
+            li.append(token)
         return li
     return reduce(add, token_gen(string), [])

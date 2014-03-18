@@ -1,10 +1,8 @@
 transfrom = {
-    "'(": "quote",
-    "`(": "quasiquote",
-    ",@(": "unquote-splicing",
-    ',(': "unquote",
-    "#(": "vector",
+    "'": "quote",
+    "`": "quasiquote",
+    ",@": "unquote-splicing",
+    ',': "unquote",
 }
 
-from .struct import Pair
-TEMP = Pair(None)  # a temp pair, simpily program struct.
+token_str = list(transfrom.keys())
