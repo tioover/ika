@@ -1,13 +1,12 @@
 import re
 from functools import reduce
 
-token_patterns = [
+token_patterns = [  # TODO: ,() '() #() ,@()
     r"\(",
     r"\)",
     r"`\(",  # quote
     r"#\(",  # vector
     "\"(\\\\\"|[^\"])*\"",  # string
-    "'(\\\\\'|[^'])*'",  # string
     "[^(\\\)|\"|\s)]+",  # name
 ]
 
