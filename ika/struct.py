@@ -48,9 +48,12 @@ empty = EmptyList()
 
 
 class Pair(ReprMixin):
-    def __init__(self, car, cdr):
+    def __init__(self, car, cdr=empty):
         self.car = car
         self.cdr = cdr
+
+    def append(self, obj):
+        self.cdr = Pair(obj)
 
     def __repr__(self):
         if type(self.car) is str:
