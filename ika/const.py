@@ -1,8 +1,14 @@
-transfrom = {
+quote = {
     "'": "quote",
     "`": "quasiquote",
     ",@": "unquote-splicing",
     ',': "unquote",
 }
 
-token_str = list(transfrom.keys())
+
+replace = {
+    "#(": ["(", "vector"],
+}
+
+token_str = list(quote.keys())
+token_str.extend(replace.keys())

@@ -1,5 +1,5 @@
 from .struct import Pair
-from .const import transfrom
+from .const import quote, replace
 
 
 def convert_tree(lexed, cursor=0, end=False):
@@ -19,6 +19,11 @@ def convert_tree(lexed, cursor=0, end=False):
     while cursor < len(lexed):
         token = lexed[cursor]
 
+        if token in replace:
+            replace_list = replace[token]
+            lexed[cursor: cursor+1] = replace_list
+            token = lexed[cursor]
+
         if token == '(':
             # Push stack.
             subtree, cursor = convert_tree(lexed, cursor+1)
@@ -30,7 +35,7 @@ def convert_tree(lexed, cursor=0, end=False):
             # Pop stack.
             return head.cdr, cursor
 
-        elif token in transfrom:
+        elif token in quote:
             content = None
             if lexed[cursor+1] == '(':
                 content, cursor = convert_tree(lexed, cursor+2)
@@ -38,7 +43,7 @@ def convert_tree(lexed, cursor=0, end=False):
             else:
                 cursor += 1
                 content = lexed[cursor]
-            prev.append(Pair(transfrom[token], content))
+            prev.append(Pair(quote[token], content))
 
         elif token == '.':
             cursor += 1
