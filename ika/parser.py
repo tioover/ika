@@ -9,7 +9,7 @@ def parser(lexed, i=0, end=False):
             lexed[i: i+1] = replace[token]
             token = lexed[i]
 
-        if token == '(':  # TODO ")" banlance
+        if token == '(':
             head = None
             # Push stack.
             for pair, i in parser(lexed, i+1):
@@ -23,8 +23,6 @@ def parser(lexed, i=0, end=False):
             yield Pair(head), i
 
         elif token == ')':
-            if end:  # Stack empty, can't pop.
-                raise SyntaxError("Brackets \")\" do not match pair.")
             # Pop stack.
             break
 

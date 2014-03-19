@@ -1,38 +1,32 @@
 import re
 from functools import reduce
-from .const import token_str
-
-token_patterns = [
-    "()",
-    "(",
-    ")",
-]
-token_patterns.extend(token_str)
-token_patterns = list(map(re.escape, token_patterns))  # escape for re.
-token_patterns.extend(  # complex re expr, can't escape.
-    [
-        r'"(\\"|[^"])*"',  # string
-        r'[^(\)|"|\s)]+',  # name
-    ]
-)
+from .const import token_patterns, remove_pattern
 
 # compile patterns.
-token_re = list(map(re.compile, token_patterns))
-space_re = re.compile(r"^\s+")
+compile = lambda patterns: list(map(re.compile, patterns))
+token_res = compile(token_patterns)
+remove_re = re.compile(remove_pattern)
 
 
-def token_gen(string):
-    while string:
-        string = space_re.sub("", string)  # remove space in string start.
+def token_gen(row):
+    while row:
+        # remove space and comment.
+        remove_match = remove_re.match(row)
+        if remove_match:
+            row = row[remove_match.end():]
+            continue
+
         match = None  # re.match result.
-        for re_obj in token_re:
-            match = re_obj.match(string)
+        for sre in token_res:
+            match = sre.match(row)
             if match is not None:
-                yield string[:match.end()]  # return matched token.
-                string = string[match.end():]  # split string.
+                yield row[:match.end()]  # return matched token.
+                row = row[match.end():]  # split row.
                 break  # stop!
-        if match is None:  # nothing matched.
-            raise SyntaxError("Can't recognize token: %s" % string)
+
+        if match is None:  # row is not "", and nothing matched.
+            print(len(row))
+            raise SyntaxError("Can't recognize token: %s" % row)
 
 
 def lexer(string):

@@ -4,11 +4,13 @@ p = parser.parser
 l = lexer.lexer
 
 
-def parser():
+def main():
     while True:
-        for exp, i in p(l(input())):
-            print(exp.car)
+        token = l(input())
+        print(token)
+        # for exp, i in p(token):
+        #     print(repr(exp.car))
 
 
 if __name__ == '__main__':
-    parser()
+    main()
