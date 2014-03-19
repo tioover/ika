@@ -19,7 +19,8 @@ def parser(lexed, i=0, end=False):
                 else:
                     prev.cdr = pair
                     prev = prev.cdr
-            yield Pair(head), i+1
+            i += 1
+            yield Pair(head), i
 
         elif token == ')':
             if end:  # Stack empty, can't pop.
