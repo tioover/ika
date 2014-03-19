@@ -2,64 +2,42 @@ from .struct import Pair
 from .const import quote, replace
 
 
-def convert_tree(lexed, cursor=0, end=False):
-    '''
-    lexed :
-        List from lexer.
-    cursor :
-        Position cursor for lexed.
-    end :
-        A flag, if True, stack is empty.
-    return value :
-        head of pair list.
-    '''
-    head = Pair(None)  # a temp pair, simpily program struct.
-    prev = head
-
-    while cursor < len(lexed):
-        token = lexed[cursor]
-
+def parser(lexed, i=0, end=False):
+    while i < len(lexed):
+        token = lexed[i]
         if token in replace:
-            replace_list = replace[token]
-            lexed[cursor: cursor+1] = replace_list
-            token = lexed[cursor]
+            lexed[i: i+1] = replace[token]
+            token = lexed[i]
 
-        if token == '(':
+        if token == '(':  # TODO ")" banlance
+            head = None
             # Push stack.
-            subtree, cursor = convert_tree(lexed, cursor+1)
-            prev.append(subtree)
+            for pair, i in parser(lexed, i+1):
+                if head is None:
+                    head = pair
+                    prev = head
+                else:
+                    prev.cdr = pair
+                    prev = prev.cdr
+            yield Pair(head), i+1
 
         elif token == ')':
             if end:  # Stack empty, can't pop.
                 raise SyntaxError("Brackets \")\" do not match pair.")
             # Pop stack.
-            return head.cdr, cursor
-
-        elif token in quote:
-            content = None
-            if lexed[cursor+1] == '(':
-                content, cursor = convert_tree(lexed, cursor+2)
-                content = Pair(content)
-            else:
-                cursor += 1
-                content = lexed[cursor]
-            prev.append(Pair(quote[token], content))
+            break
 
         elif token == '.':
-            cursor += 1
-            prev.cdr = lexed[cursor]
+            yield lexed[i+1], i+1
+            break
+
+        elif token in quote:
+            gen = parser(lexed, i+1)
+            expr, i = next(gen)
+            expr = Pair(quote[token], expr)
+            yield Pair(expr), i
 
         else:
-            prev.append(token)
+            yield Pair(token), i
 
-        prev = prev.cdr
-        cursor += 1
-
-    if not end:  # Stack not empty.
-        raise SyntaxError("Brackets \"(\" do not match pair.")
-    return head.cdr
-
-
-def parser(lexed):
-    exp = convert_tree(lexed, end=True)
-    return exp
+        i += 1

@@ -3,6 +3,7 @@ from functools import reduce
 from .const import token_str
 
 token_patterns = [
+    "()",
     "(",
     ")",
 ]
