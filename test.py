@@ -7,9 +7,7 @@ l = lexer.lexer
 def main():
     while True:
         token = l(input())
-        print(token)
-        # for exp, i in p(token):
-        #     print(repr(exp.car))
+        print(p(token))
 
 
 if __name__ == '__main__':

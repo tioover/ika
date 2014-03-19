@@ -2,24 +2,22 @@ from .struct import Pair
 from .const import quote, replace
 
 
-def parser(lexed, i=0, end=False):
+def expr_gen(lexed, i=0):
     while i < len(lexed):
         token = lexed[i]
         if token in replace:
             lexed[i: i+1] = replace[token]
-            token = lexed[i]
+            continue
 
         if token == '(':
-            head = None
-            # Push stack.
-            for pair, i in parser(lexed, i+1):
-                if head is None:
-                    head = pair
-                    prev = head
-                else:
-                    prev.cdr = pair
-                    prev = prev.cdr
-            i += 1
+            i += 1  # skip '('
+            gen = expr_gen(lexed, i)
+            head, i = next(gen)
+            prev = head
+            for pair, i in gen:
+                prev.cdr = pair
+                prev = prev.cdr
+            i += 1  # skip ')'
             yield Pair(head), i
 
         elif token == ')':
@@ -27,11 +25,12 @@ def parser(lexed, i=0, end=False):
             break
 
         elif token == '.':
-            yield lexed[i+1], i+1
+            i += 1  # skip '.'
+            yield lexed[i], i
             break
 
         elif token in quote:
-            gen = parser(lexed, i+1)
+            gen = expr_gen(lexed, i+1)
             expr, i = next(gen)
             expr = Pair(quote[token], expr)
             yield Pair(expr), i
@@ -40,3 +39,18 @@ def parser(lexed, i=0, end=False):
             yield Pair(token), i
 
         i += 1
+
+
+def parser(lexed):
+    gen = expr_gen(lexed)
+    head, i = next(gen)
+    try:
+        for expr, i in gen:
+            head.cdr = expr
+    except AttributeError:
+        raise SyntaxError("Unexpected '('")
+    if i >= len(lexed):
+        raise SyntaxError("Unexpected '('")
+    elif i+1 < len(lexed):
+        raise SyntaxError("Unexpected ')'")
+    return head
