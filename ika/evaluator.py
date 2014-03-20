@@ -1,5 +1,4 @@
-def analyze(exp):
-    pass
+from analyze import analyze
 
 
 def eval(eval_func, env):
