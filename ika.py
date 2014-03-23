@@ -4,23 +4,26 @@ from ika.struct import Env
 from ika.parser import parser
 from ika.evaluator import eval
 from ika.lexer import lexer
+from ika.utils import cons_iter
 
-base_env = "test"
+base_env = Env()
 
 
-def run(input_):
-    return eval(parser(lexer(input_)), base_env)
+def run(input_, end=lambda x: sys.stdout.write(repr(x))):
+    expr = cons_iter(parser(lexer(input_)))
+    for e in expr:
+        eval(e, base_env, end=end)
 
 
 def interactive():
     import readline
     print(";; IKA 0.0.0")
     while True:
-        print("%s" % run(input("; > ")))
+        run(input("\n; > "))
 
 
 def readfile():
-    sys.stdout.write(run(sys.stdin.read()))
+    run(sys.stdin.read())
 
 
 def main():

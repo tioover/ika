@@ -13,8 +13,8 @@ def analyzer(expr):
             return handler.analyze(analyzer, expr)
 
 
-def eval(s_exp, env):
-    return analyzer(s_exp)(env)
+def eval(s_exp, env, end):
+    end(analyzer(s_exp)(env))
 
 
 def apply(proc, args):

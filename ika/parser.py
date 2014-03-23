@@ -42,15 +42,14 @@ def expr_gen(lexed, i=0):
 
 
 def parser(lexed):
-    gen = expr_gen(lexed)
-    head, i = next(gen)
-    try:
-        for expr, i in gen:
-            head.cdr = expr
-    except AttributeError:
-        raise SyntaxError("Unexpected '('")
+    head = Pair(None)
+    prev = head
+    for now, i in expr_gen(lexed):
+        prev.cdr = now
+        prev = now
+
     if i >= len(lexed):
         raise SyntaxError("Unexpected '('")
     elif i+1 < len(lexed):
         raise SyntaxError("Unexpected ')'")
-    return head
+    return head.cdr

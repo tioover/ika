@@ -4,5 +4,5 @@ def condition(expr):
 
 def analyze(analyzer, expr):
     def analyed(env):
-        return env
+        return expr
     return analyed
