@@ -1,10 +1,2 @@
-import application
-import assignment
-import begin
-import cond
-import definition
-import if_
-import lambda_
-import quoted
-import self_evaluating
-import variable
+from . import application, assignment, begin, cond, definition, if_, lambda_,\
+    quoted, self_evaluating, variable

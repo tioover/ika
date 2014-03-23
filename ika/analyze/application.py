@@ -1,6 +1,8 @@
 def condition(expr):
-    pass
+    return True
 
 
 def analyze(analyzer, expr):
-    pass
+    def analyed(env):
+        return env
+    return analyed

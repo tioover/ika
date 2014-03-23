@@ -1,12 +1,11 @@
 #!/bin/env python3
 import sys
-from config import config
-from struct import Env
-from parser import parser
-from evaluator import eval
-from lexer import lexer
+from ika.struct import Env
+from ika.parser import parser
+from ika.evaluator import eval
+from ika.lexer import lexer
 
-base_env = Env()
+base_env = "test"
 
 
 def run(input_):
@@ -14,26 +13,25 @@ def run(input_):
 
 
 def interactive():
-    readline.read_history_file([config["history_path"]])
+    import readline
     print(";; IKA 0.0.0")
     while True:
-        print("%s" % run(input("; >")))
+        print("%s" % run(input("; > ")))
 
 
 def readfile():
     sys.stdout.write(run(sys.stdin.read()))
 
 
-if __name__ == '__main__':
+def main():
     if sys.stdin.isatty():
-        import readline
-        try:
-            interactive()
-        except KeyboardInterrupt:
-            readline.read_history_file([config["history_path"]])
-            exit()
+        interactive()
     else:
-        try:
-            readfile()
-        except EOFError:
-            exit()
+        readfile()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (EOFError, KeyboardInterrupt):
+        exit()

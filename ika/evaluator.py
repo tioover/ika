@@ -1,5 +1,5 @@
 import types
-import analyze
+from . import analyze
 
 
 def analyzer(expr):
@@ -13,8 +13,8 @@ def analyzer(expr):
             return handler.analyze(analyzer, expr)
 
 
-def eval(eval_func, env):
-    return analyze(env)
+def eval(s_exp, env):
+    return analyzer(s_exp)(env)
 
 
 def apply(proc, args):
