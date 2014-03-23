@@ -1,4 +1,4 @@
-class Singleton():
+class Singleton:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -6,6 +6,19 @@ class Singleton():
             cls._instance = super(Singleton, cls).__new__(
                 cls, *args, **kwargs)
         return cls._instance
+
+
+class Tree:
+    def __init__(self, data=None, parent=None):
+        self.data = data
+        if parent:
+            parent.children.append(self)
+        self.parent = parent
+
+
+class Env(Tree):
+    def __init__(self, dict_={}, parent=None):
+        super(Env, self).__init__(dict_, parent)
 
 
 class ReprMixin():
@@ -68,15 +81,3 @@ class Pair(ReprMixin):
         else:
             string = "(%s . %s)" % (car_str, repr(self.cdr))  # little bug.
         return string
-
-
-def cons(x, y):
-    return Pair(x, y)
-
-
-def car(x):
-    return x.car
-
-
-def cdr(x):
-    return x.cdr
