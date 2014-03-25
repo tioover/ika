@@ -37,7 +37,7 @@ class Symbol():
 
 class T(ReprMixin, Singleton):
     def __repr__(self):
-        "#t"
+        return "#t"
 
     def __bool__(self):
         return True
@@ -45,7 +45,7 @@ class T(ReprMixin, Singleton):
 
 class F(ReprMixin, Singleton):
     def __repr__(self):
-        "#f"
+        return "#f"
 
     def __bool__(self):
         return False
@@ -53,7 +53,7 @@ class F(ReprMixin, Singleton):
 
 class EmptyList(ReprMixin, Singleton):
     def __repr__(self):
-        return "`()"
+        return "()"
 
 t = T()
 f = F()

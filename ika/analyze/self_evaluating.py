@@ -11,12 +11,17 @@ def convert_number(expr):
         return float(expr)
 
 type_table = [
-    # (judgment, convert),
-    (lambda e: e[0] == e[-1] == '"', str),  # string
-    (lambda e: number_pattern.match(e), convert_number),  # number
-    (lambda e: e == "()", lambda e: empty),  # ()
-    (lambda e: e == "#t", lambda e: t),  # true
-    (lambda e: e == "#f", lambda e: f),  # false
+    # (judgement, convert),
+    # string
+    (lambda e: e[0] == e[-1] == '"', eval),
+    # number
+    (lambda e: number_pattern.match(e), convert_number),
+    # ()
+    (lambda e: e == "()", lambda e: empty),
+    # true
+    (lambda e: e == "#t", lambda e: t),
+    # false
+    (lambda e: e == "#f", lambda e: f),
 ]
 
 
@@ -28,4 +33,7 @@ def analyze(analyzer, expr):
     for i in type_table:
         if i[0](expr):
             break
-    return i[1](expr)
+
+    def analyzed(env):
+        return i[1](expr)
+    return analyzed
