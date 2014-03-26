@@ -1,6 +1,15 @@
+from ..utils import tagged
+from ..struct import Procedure
+
+
 def condition(expr):
-    pass
+    return tagged(expr, "lambda")
 
 
 def analyze(analyzer, expr):
-    pass
+    args = expr.cdar
+    body = analyzer(expr.cdr.cdr.car)
+
+    def analyzed(env):
+        return Procedure(env, args, body)
+    return analyzed

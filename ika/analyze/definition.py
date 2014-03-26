@@ -1,4 +1,4 @@
-from ..utils import tagged
+from ..utils import tagged, get_operand
 from ..struct import empty
 
 
@@ -8,6 +8,7 @@ def condition(expr):
 
 def analyze(analyzer, expr):
     def analyed(env):
-        env[expr.cdr.car] = analyzer(expr.cdr.cdr.car)(env)
+        args = get_operand(expr)
+        env[args.car] = analyzer(args.cdar)(env)
         return empty
     return analyed

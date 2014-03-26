@@ -3,7 +3,15 @@ from .struct import Pair, empty
 
 
 def tagged(expr, name):
-    return isinstance(expr, Pair) and expr.car == name
+    return isinstance(expr, Pair) and get_operator(expr) == name
+
+
+def get_operator(expr):
+    return expr.car
+
+
+def get_operand(expr):
+    return expr.cdr
 
 
 def cons_iter(x):

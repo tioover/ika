@@ -17,7 +17,9 @@ class Tree:
 
 
 class Env(Tree):
-    def __init__(self, dict_={}, parent=None):
+    def __init__(self, parent=None, dict_=None):
+        if dict_ is None:
+            dict_ = dict()
         super(Env, self).__init__(dict_, parent)
 
     def __getitem__(self, key):
@@ -30,6 +32,9 @@ class Env(Tree):
 
     def __setitem__(self, k, v):
         self.data[k] = v
+
+    def extend(self):
+        return Env(self)
 
 
 class ReprMixin():
@@ -79,6 +84,10 @@ class Pair(ReprMixin):
     def append(self, obj):
         self.cdr = Pair(obj)
 
+    @property
+    def cdar(self):
+        return self.cdr.car
+
     def __repr__(self):
         if type(self.car) is str:
             car_str = "\"%s\"" % repr(self.car)[1:-1]
@@ -92,3 +101,25 @@ class Pair(ReprMixin):
         else:
             string = "(%s . %s)" % (car_str, repr(self.cdr))  # little bug.
         return string
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.cdr is None:
+            raise StopIteration
+        return self.cdr
+
+
+class Procedure(ReprMixin):
+    formal_args = None
+    body = None
+    env = None
+
+    def __init__(self, env, formal_args, body):
+        self.formal_args = formal_args
+        self.body = body
+        self.env = env
+
+    def __repr__(self):
+        return "#<lambda>"
