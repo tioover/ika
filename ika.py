@@ -4,15 +4,13 @@ from ika.struct import Env
 from ika.parser import parser
 from ika.evaluator import pre_interpreter, eval
 from ika.lexer import lexer
-from ika.utils import cons_iter
 
 base_env = Env()
 base_env = pre_interpreter(base_env)
 
 
 def run(input_, end=lambda x: sys.stdout.write(repr(x))):
-    expr = cons_iter(parser(lexer(input_)))
-    for e in expr:
+    for e in parser(lexer(input_)):
         eval(e, base_env, end=end)
 
 

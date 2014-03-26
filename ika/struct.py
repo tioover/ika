@@ -9,6 +9,8 @@ class Singleton:
 
 
 class Tree:
+    children = []
+
     def __init__(self, data=None, parent=None):
         self.data = data
         if parent:
@@ -33,8 +35,8 @@ class Env(Tree):
     def __setitem__(self, k, v):
         self.data[k] = v
 
-    def extend(self):
-        return Env(self)
+    def extend(self, dict_=None):
+        return Env(self, dict_)
 
 
 class ReprMixin():
@@ -71,6 +73,15 @@ class EmptyList(ReprMixin, Singleton):
     def __repr__(self):
         return "()"
 
+    def __bool__(self):
+        return False
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        raise StopIteration
+
 t = T()
 f = F()
 empty = EmptyList()
@@ -103,12 +114,16 @@ class Pair(ReprMixin):
         return string
 
     def __iter__(self):
+        self.it = self
         return self
 
     def __next__(self):
-        if self.cdr is None:
+        if self.it is empty:
+            del self.it
             raise StopIteration
-        return self.cdr
+        result = self.it.car
+        self.it = self.it.cdr
+        return result
 
 
 class Procedure(ReprMixin):
@@ -120,6 +135,9 @@ class Procedure(ReprMixin):
         self.formal_args = formal_args
         self.body = body
         self.env = env
+
+    def __call__(self, env):
+        self.body(env)
 
     def __repr__(self):
         return "#<lambda>"

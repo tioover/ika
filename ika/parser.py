@@ -1,4 +1,4 @@
-from .struct import Pair
+from .struct import Pair, empty
 from .const import quote, replace
 
 
@@ -42,6 +42,9 @@ def expr_gen(lexed, i=0):
 
 
 def parser(lexed):
+    if not lexed:
+        return empty
+
     head = Pair(None)
     prev = head
     for now, i in expr_gen(lexed):
