@@ -1,6 +1,11 @@
+from . import self_evaluating
+
+
 def condition(expr):
-    pass
+    return type(expr) is str and not self_evaluating.condition(expr)
 
 
 def analyze(analyzer, expr):
-    pass
+    def analyzed(env):
+        return env[expr]
+    return analyzed

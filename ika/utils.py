@@ -1,5 +1,9 @@
 import os
-from .struct import empty
+from .struct import Pair, empty
+
+
+def tagged(expr, name):
+    return isinstance(expr, Pair) and expr.car == name
 
 
 def cons_iter(x):

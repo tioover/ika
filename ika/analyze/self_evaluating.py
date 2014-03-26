@@ -26,7 +26,10 @@ type_table = [
 
 
 def condition(expr):
-    return list(filter(lambda i: i[0](expr), type_table))
+    if type(expr) is not str:
+        return False
+    else:
+        return list(filter(lambda i: i[0](expr), type_table))
 
 
 def analyze(analyzer, expr):

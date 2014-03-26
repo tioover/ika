@@ -2,6 +2,10 @@ import types
 from . import analyze
 
 
+def pre_interpreter(base_env):
+    return base_env
+
+
 def analyzer(expr):
     pipeline = filter(
         lambda x: isinstance(x, types.ModuleType),

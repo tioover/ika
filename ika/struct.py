@@ -20,6 +20,17 @@ class Env(Tree):
     def __init__(self, dict_={}, parent=None):
         super(Env, self).__init__(dict_, parent)
 
+    def __getitem__(self, key):
+        now = self
+        while now:
+            if key in now.data:
+                return now.data[key]
+            now = now.parent
+        raise NameError("name %s not found." % key)
+
+    def __setitem__(self, k, v):
+        self.data[k] = v
+
 
 class ReprMixin():
     def __str__(self):

@@ -2,11 +2,12 @@
 import sys
 from ika.struct import Env
 from ika.parser import parser
-from ika.evaluator import eval
+from ika.evaluator import pre_interpreter, eval
 from ika.lexer import lexer
 from ika.utils import cons_iter
 
 base_env = Env()
+base_env = pre_interpreter(base_env)
 
 
 def run(input_, end=lambda x: sys.stdout.write(repr(x))):
