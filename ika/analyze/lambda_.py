@@ -12,5 +12,6 @@ def analyze(analyzer, expr):
     body = begin.analyze(analyzer, Pair("begin", expr.cdr.cdr))
 
     def analyzed(env):
+        # TODO improve lexical closure.
         return Procedure(env, args, body)
     return analyzed

@@ -1,12 +1,14 @@
 import re
 
+float_pattern = re.compile('\d+\.\d+$')
+
+
 quote = {
     "'": "quote",
     "`": "quasiquote",
     ",@": "unquote-splicing",
     ',': "unquote",
 }
-
 
 replace = {
     "#(": ["(", "vector"],

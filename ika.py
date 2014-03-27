@@ -2,7 +2,7 @@
 import sys
 from ika.struct import Env
 from ika.parser import parser
-from ika.evaluator import pre_interpreter, eval
+from ika.evaluator import pre_interpreter, eval_
 from ika.lexer import lexer
 
 base_env = Env()
@@ -11,7 +11,7 @@ base_env = pre_interpreter(base_env)
 
 def run(input_, end=lambda x: sys.stdout.write(repr(x))):
     for e in parser(lexer(input_)):
-        eval(e, base_env, end=end)
+        eval_(e, base_env, end=end)
 
 
 def interactive():
@@ -22,7 +22,7 @@ def interactive():
 
 
 def readfile():
-    run(sys.stdin.read())
+    run(sys.stdin.read(), lambda x: x)
 
 
 def main():

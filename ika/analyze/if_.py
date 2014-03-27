@@ -12,12 +12,13 @@ def analyze(analyzer, expr):
     consequent = analyzer(expr.cdar)
     alternate = expr.cdr.cdr
     if alternate is not empty:
-        alternate = alternate.car
-    alternate = analyzer(alternate)
+        alternate = analyzer(alternate.car)
 
     def analyzed(env):
         if test(env) is not f:
             return consequent(env)
-        else:
+        elif alternate is not empty:
             return alternate(env)
+        else:
+            return empty
     return analyzed

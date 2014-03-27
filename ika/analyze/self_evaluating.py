@@ -1,25 +1,15 @@
-import re
-from ..struct import Pair, empty, t, f
+from ..struct import List, t, f
+from ..const import float_pattern
 
-number_pattern = re.compile('\d+(\.\d+)?$')
-
-
-def convert_number(expr):
-    if expr.isdigit():
-        return int(expr)
-    else:
-        return float(expr)
 
 type_table = [
     # (judgement, convert),
-    # empty
-    (lambda e: e is empty, lambda x: x),
     # string
     (lambda e: e[0] == e[-1] == '"', eval),
-    # number
-    (lambda e: number_pattern.match(e), convert_number),
-    # ()
-    # (lambda e: e == "()", lambda e: empty),
+    # int
+    (lambda e: e.isdigit(), int),
+    # float
+    (lambda e: float_pattern.match(e), float),
     # true
     (lambda e: e == "#t", lambda e: t),
     # false
@@ -28,7 +18,7 @@ type_table = [
 
 
 def condition(expr):
-    if isinstance(expr, Pair):
+    if isinstance(expr, List):
         return False
     for i in type_table:
         if i[0](expr):

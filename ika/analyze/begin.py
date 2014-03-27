@@ -1,5 +1,4 @@
-from ..utils import tagged, get_operand
-from ..struct import Pair, empty
+from ..utils import tagged, get_operand, cons_map
 
 
 def condition(expr):
@@ -7,14 +6,10 @@ def condition(expr):
 
 
 def analyze(analyzer, expr):
-    seq = get_operand(expr)
+    seq = cons_map(analyzer, get_operand(expr))
 
     def analyzed(env):
-        if not isinstance(seq, Pair):
-            return analyzer(seq)(env)
-        r = analyzer(seq.car)(env)
-        if seq.cdr is empty:
-            return r
-        else:
-            return analyze(analyzer, seq.cdr)(env)
+        for i in seq:
+            r = i(env)
+        return r
     return analyzed

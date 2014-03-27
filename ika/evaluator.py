@@ -1,5 +1,5 @@
 from .analyze import application, assignment, begin, cond, definition,\
-    if_, lambda_, quoted, self_evaluating, variable, cons
+    if_, lambda_, quoted, self_evaluating, variable
 
 
 def pre_interpreter(base_env):
@@ -18,8 +18,7 @@ def analyzer(expr):
         if_,
         begin,
         assignment,
-        cons,
-        application,  # must place to end.
+        application,
     ]
 
     for handler in pipeline:
@@ -28,5 +27,5 @@ def analyzer(expr):
     raise ValueError("expr can't inpterpretation.")
 
 
-def eval(s_exp, env, end):
+def eval_(s_exp, env, end):
     end(analyzer(s_exp)(env))

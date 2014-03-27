@@ -29,6 +29,9 @@ def expr_gen(lexed, i=0):
             yield lexed[i], i
             break
 
+        elif token == "()":
+            yield Pair(empty), i
+
         elif token in quote:
             gen = expr_gen(lexed, i+1)
             expr, i = next(gen)

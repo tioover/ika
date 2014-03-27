@@ -72,7 +72,11 @@ class F(ReprMixin, Singleton):
         return False
 
 
-class EmptyList(ReprMixin, Singleton):
+class List:
+    pass
+
+
+class EmptyList(ReprMixin, Singleton, List):
     def __repr__(self):
         return "()"
 
@@ -90,7 +94,7 @@ f = F()
 empty = EmptyList()
 
 
-class Pair(ReprMixin):
+class Pair(ReprMixin, List):
     def __init__(self, car, cdr=empty):
         self.car = car
         self.cdr = cdr
@@ -143,4 +147,4 @@ class Procedure(ReprMixin):
         self.body(env)
 
     def __repr__(self):
-        return "#<lambda>"
+        return "#<procedure>"
