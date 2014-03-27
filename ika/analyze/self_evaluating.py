@@ -17,7 +17,7 @@ type_table = [
     # number
     (lambda e: number_pattern.match(e), convert_number),
     # ()
-    (lambda e: e == "()", lambda e: empty),
+    # (lambda e: e == "()", lambda e: empty),
     # true
     (lambda e: e == "#t", lambda e: t),
     # false
