@@ -16,7 +16,6 @@ def token_gen(row):
             row = row[remove_match.end():]
             continue
 
-        match = None  # re.match result.
         for sre in token_res:
             match = sre.match(row)
             if match is not None:
@@ -25,7 +24,6 @@ def token_gen(row):
                 break  # stop!
 
         if match is None:  # row is not "", and nothing matched.
-            print(len(row))
             raise SyntaxError("Can't recognize token: %s" % row)
 
 
