@@ -3,10 +3,12 @@ from ..utils import get_operand, get_operator
 
 
 def condition(expr):
-    return isinstance(expr, Pair)
+    return isinstance(expr, Pair) or expr == "()"
 
 
 def analyze(analyzer, expr):
+    if expr == "()":
+        raise SyntaxError("illegal empty application.")
 
     def analyzed(env):
         operator = analyzer(get_operator(expr))(env)

@@ -52,6 +52,9 @@ class Symbol():
     def __str__(self):
         return self._string
 
+    def __repr__(self):
+        return "`" + str(self)
+
 
 class T(ReprMixin, Singleton):
     def __repr__(self):
