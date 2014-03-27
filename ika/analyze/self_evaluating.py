@@ -1,5 +1,5 @@
 import re
-from ..struct import empty, t, f
+from ..struct import Pair, empty, t, f
 
 number_pattern = re.compile('\d+(\.\d+)?$')
 
@@ -12,6 +12,8 @@ def convert_number(expr):
 
 type_table = [
     # (judgement, convert),
+    # empty
+    (lambda e: e is empty, lambda x: x),
     # string
     (lambda e: e[0] == e[-1] == '"', eval),
     # number
@@ -26,10 +28,12 @@ type_table = [
 
 
 def condition(expr):
-    if type(expr) is not str:
+    if isinstance(expr, Pair):
         return False
-    else:
-        return list(filter(lambda i: i[0](expr), type_table))
+    for i in type_table:
+        if i[0](expr):
+            return True
+    return False
 
 
 def analyze(analyzer, expr):
