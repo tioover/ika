@@ -1,6 +1,6 @@
 from ..utils import tagged
-from ..struct import Procedure
-from . import sequence
+from ..struct import Procedure, Pair
+from . import begin
 
 
 def condition(expr):
@@ -9,7 +9,7 @@ def condition(expr):
 
 def analyze(analyzer, expr):
     args = expr.cdar
-    body = sequence.analyze(analyzer, expr.cdr.cdr.car)
+    body = begin.analyze(analyzer, Pair("begin", expr.cdr.cdr))
 
     def analyzed(env):
         return Procedure(env, args, body)

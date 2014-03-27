@@ -16,7 +16,7 @@ def run(input_, end=lambda x: sys.stdout.write(repr(x))):
 
 def interactive():
     import readline
-    print(";; IKA 0.0.0")
+    print(";; IKA 0.0.1")
     while True:
         run(input("\n; > "))
 
