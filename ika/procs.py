@@ -1,34 +1,82 @@
-from .struct import t, f, empty, Pair
+from .struct import Pair, Symbol, Boolean, Procedure, f, t, empty
 
 
-def is_true(atom):
-    if atom is f:
-        return f
-    else:
-        return t
+base = {}
 
 
-def is_false(atom):
-    if atom is f:
-        return t
-    else:
-        return f
+def sign(name=None):
+    def warp(func):
+        k = name
+        if k is None:
+            k = func.__name__
+
+        def g(*args):
+            rtn = func(*args)
+            if rtn is True:
+                return t
+            elif rtn is False:
+                return f
+            else:
+                return rtn
+
+        base[k] = g
+        return g
+    return warp
 
 
-def is_null(atom):
-    if atom is empty:
-        return t
-    else:
-        return f
+@sign()
+def add(a, b):
+    return a+b
 
 
-def cons(x, y):
-    return Pair(x, y)
+@sign()
+def cons(a, b):
+    return Pair(a, b)
 
 
-def car(x):
-    return x.car
+@sign("eq?")
+def eq(a, b):
+    return a is b
 
 
-def cdr(x):
-    return x.cdr
+@sign("boolean?")
+def boolean(a):
+    return isinstance(a, Boolean)
+
+
+@sign("pair?")
+def pair(a):
+    return isinstance(a, Pair)
+
+
+@sign("symbol?")
+def symbol(a):
+    return isinstance(a, Symbol)
+
+
+@sign("char?")
+def char(a):
+    return isinstance(a, str) and len(a) == 1
+
+
+@sign("string?")
+def string(a):
+    return isinstance(a, str) and len(a) > 1
+
+
+@sign("vector?")
+def vector(a):
+    return isinstance(a, list)
+
+
+# TODO port
+
+
+@sign("procedure?")
+def procedure(a):
+    return isinstance(a, Procedure)
+
+
+@sign("null?")
+def null(a):
+    return a is empty

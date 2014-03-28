@@ -8,6 +8,14 @@ class Singleton:
         return cls._instance
 
 
+class PRE(Singleton):
+    '''PRE interpretation flag.'''
+    pass
+
+
+pyapply_flag = PRE
+
+
 class Tree:
     children = []
 
@@ -56,7 +64,11 @@ class Symbol():
         return "`" + str(self)
 
 
-class T(ReprMixin, Singleton):
+class Boolean:
+    pass
+
+
+class T(ReprMixin, Singleton, Boolean):
     def __repr__(self):
         return "#t"
 
@@ -64,7 +76,7 @@ class T(ReprMixin, Singleton):
         return True
 
 
-class F(ReprMixin, Singleton):
+class F(ReprMixin, Singleton, Boolean):
     def __repr__(self):
         return "#f"
 

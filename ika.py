@@ -1,15 +1,23 @@
 #!/bin/env python3
 import sys
+from ika.const import base_scm
 from ika.struct import Env
 from ika.parser import parser
-from ika.evaluator import pre_interpreter, eval_
+from ika.evaluator import eval_
 from ika.lexer import lexer
+
+
+def pre_interpreter(base_env):
+    with open(base_scm) as src:
+        for expr in parser(lexer(src.read()), pre=True):
+            eval_(expr, base_env)
+    return base_env
 
 base_env = Env()
 base_env = pre_interpreter(base_env)
 
 
-def run(input_, end=lambda x: sys.stdout.write(repr(x))):
+def run(input_, end=None):
     for e in parser(lexer(input_)):
         eval_(e, base_env, end=end)
 
@@ -18,11 +26,11 @@ def interactive():
     import readline
     print(";; IKA 0.0.1")
     while True:
-        run(input("\n; > "))
+        run(input("\n; > "), lambda x: sys.stdout.write(repr(x)))
 
 
 def readfile():
-    run(sys.stdin.read(), lambda x: x)
+    run(sys.stdin.read())
 
 
 def main():
