@@ -49,7 +49,6 @@ class Env(Tree):
     def __getitem__(self, key):
         now = self
         while now:
-            print(key)
             if key in now.data:
                 return now.data[key]
             now = now.parent
