@@ -35,19 +35,22 @@ def analyze(analyzer, expr):
     operand = cons_map(analyzer, get_operand(expr))
 
     def analyzed(env):
-        func = operator
-        args = operand
-        body = True  # loop once flag
+        operator_ = operator
+        operand_ = operand
+        body = True
 
-        while body or isinstance(body, Analyzed):
-            body = False
-            operator_ = func(env)
-            operand_ = cons_map(lambda a: a(env), args)
-            body = operator_.body
-            if not isinstance(operator_, Procedure):
+        while body is True or isinstance(body, Analyzed):
+            func = operator_(env)
+            args = cons_map(lambda a: a(env), operand_)
+
+            if not isinstance(func, Procedure):
                 raise TypeError("%s is not procedure." % str(operator_))
-            env = operator_.env.extend(
-                arg_zip(operator_.formal_args, operand_))
+            elif body is True:
+                env = env.extend(func.env.data)
+
+            body = func.body
+            env.update(arg_zip(func.formal_args, args))
+
             if body.name == __name__:
                 func, args = body.raw
             else:

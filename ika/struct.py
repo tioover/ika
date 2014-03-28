@@ -49,6 +49,7 @@ class Env(Tree):
     def __getitem__(self, key):
         now = self
         while now:
+            print(key)
             if key in now.data:
                 return now.data[key]
             now = now.parent
@@ -59,6 +60,9 @@ class Env(Tree):
 
     def extend(self, dict_=None):
         return Env(self, dict_)
+
+    def update(self, dict_=None):
+        self.data.update(dict_)
 
 
 class ReprMixin:
