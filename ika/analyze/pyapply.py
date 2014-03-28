@@ -1,6 +1,6 @@
 from ..utils import tagged, get_operand, get_operator, cons_map
 from ..procs import base
-from ..struct import pyapply_flag
+from ..struct import pyapply_flag, Analyzed
 
 
 def condition(expr):
@@ -15,4 +15,4 @@ def analyze(analyzer, expr):
     def analyzed(env):
         return func(*list(cons_map(lambda a: a(env), args)))
 
-    return analyzed
+    return Analyzed(__name__, analyzed)

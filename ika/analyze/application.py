@@ -1,4 +1,4 @@
-from ..struct import List, empty, Procedure
+from ..struct import List, empty, Procedure, Analyzed
 from ..utils import get_operand, get_operator, cons_map
 
 
@@ -35,12 +35,24 @@ def analyze(analyzer, expr):
     operand = cons_map(analyzer, get_operand(expr))
 
     def analyzed(env):
-        operator_ = operator(env)
-        operand_ = cons_map(lambda a: a(env), operand)
-        if not isinstance(operator_, Procedure):
-            raise TypeError("%s is not procedure." % str(operator_))
-        new_env = operator_.env.extend(
-            arg_zip(operator_.formal_args, operand_))
-        return operator_.body(new_env)
+        func = operator
+        args = operand
+        body = True  # loop once flag
 
-    return analyzed
+        while body or isinstance(body, Analyzed):
+            body = False
+            operator_ = func(env)
+            operand_ = cons_map(lambda a: a(env), args)
+            body = operator_.body
+            if not isinstance(operator_, Procedure):
+                raise TypeError("%s is not procedure." % str(operator_))
+            env = operator_.env.extend(
+                arg_zip(operator_.formal_args, operand_))
+            if body.name == __name__:
+                func, args = body.raw
+            else:
+                body = body.func(env)
+
+        return body
+
+    return Analyzed(__name__, analyzed, (operator, operand))

@@ -1,4 +1,4 @@
-from ..struct import List, t, f
+from ..struct import List, t, f, Analyzed
 from ..const import float_pattern
 
 
@@ -33,4 +33,4 @@ def analyze(analyzer, expr):
 
     def analyzed(env):
         return i[1](expr)
-    return analyzed
+    return Analyzed(__name__, analyzed)

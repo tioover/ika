@@ -1,5 +1,5 @@
 from ..utils import tagged
-from ..struct import Pair, Symbol, empty
+from ..struct import Pair, Symbol, empty, Analyzed
 from . import self_evaluating
 
 
@@ -22,4 +22,4 @@ def quote(analyzer, expr):
             return expr
         else:
             return Symbol(expr)
-    return analyzed
+    return Analyzed(__name__, analyzed)

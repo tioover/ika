@@ -1,5 +1,5 @@
 from ..utils import tagged, get_operand
-from ..struct import f, empty
+from ..struct import f, empty, Analyzed
 
 
 def condition(expr):
@@ -16,9 +16,9 @@ def analyze(analyzer, expr):
 
     def analyzed(env):
         if test(env) is not f:
-            return consequent(env)
+            return consequent
         elif alternate is not empty:
-            return alternate(env)
+            return alternate
         else:
             return empty
-    return analyzed
+    return Analyzed(__name__, analyzed)

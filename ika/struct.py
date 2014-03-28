@@ -13,7 +13,7 @@ class PRE(Singleton):
     pass
 
 
-pyapply_flag = PRE
+pyapply_flag = PRE()
 
 
 class Tree:
@@ -24,6 +24,20 @@ class Tree:
         if parent:
             parent.children.append(self)
         self.parent = parent
+
+
+class Analyzed:
+
+    def __init__(self, name, func, raw=()):
+        self.name = name
+        self.func = func
+        self.raw = raw
+
+    def __call__(self, env):
+        now = self
+        while isinstance(now, Analyzed):
+            now = now.func(env)
+        return now
 
 
 class Env(Tree):
@@ -47,12 +61,12 @@ class Env(Tree):
         return Env(self, dict_)
 
 
-class ReprMixin():
+class ReprMixin:
     def __str__(self):
         return repr(self)
 
 
-class Symbol():
+class Symbol:
 
     def __init__(self, string):
         self._string = string

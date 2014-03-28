@@ -1,5 +1,5 @@
 from ..utils import tagged
-from ..struct import Procedure, Pair
+from ..struct import Procedure, Pair, Analyzed
 from . import begin
 
 
@@ -14,4 +14,4 @@ def analyze(analyzer, expr):
     def analyzed(env):
         # TODO improve lexical closure.
         return Procedure(env, args, body)
-    return analyzed
+    return Analyzed(__name__, analyzed)

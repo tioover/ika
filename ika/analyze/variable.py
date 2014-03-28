@@ -1,4 +1,5 @@
 from . import self_evaluating, application
+from ..struct import Analyzed
 
 
 def condition(expr):
@@ -9,4 +10,4 @@ def condition(expr):
 def analyze(analyzer, expr):
     def analyzed(env):
         return env[expr]
-    return analyzed
+    return Analyzed(__name__, analyzed)

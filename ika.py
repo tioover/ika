@@ -26,7 +26,7 @@ def interactive():
     import readline
     print(";; IKA 0.0.1")
     while True:
-        run(input("\n; > "), lambda x: sys.stdout.write(repr(x)))
+        run(input("; > "), lambda x: print(repr(x)))
 
 
 def readfile():
