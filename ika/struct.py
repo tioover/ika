@@ -28,10 +28,10 @@ class Tree:
 
 class Analyzed:
 
-    def __init__(self, name, func, raw=()):
+    def __init__(self, name, func, table=()):
         self.name = name
         self.func = func
-        self.raw = raw
+        self.table = table
 
     def __call__(self, env):
         now = self
