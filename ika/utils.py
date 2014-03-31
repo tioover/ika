@@ -1,3 +1,9 @@
+def dict_map(func, dict_):
+    for k in dict_:
+        dict_[k] = func(dict_[k])
+    return dict_
+
+
 from .struct import Pair, empty
 
 

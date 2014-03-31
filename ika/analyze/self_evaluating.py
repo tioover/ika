@@ -28,9 +28,10 @@ def condition(expr):
 
 def analyze(analyzer, expr):
     for i in type_table:
-        if i[0](expr):
+        judgement, convert = i
+        if judgement(expr):
             break
 
     def analyzed(env):
-        return i[1](expr)
+        return convert(expr)
     return Analyzed(__name__, analyzed)

@@ -12,6 +12,18 @@ def analyze(analyzer, expr):
     body = begin.analyze(analyzer, Pair("begin", expr.cdr.cdr))
 
     def analyzed(env):
-        # TODO improve lexical closure.
-        return Procedure(env, args, body)
+        return Procedure(make_closure(env, expr), args, body)
     return Analyzed(__name__, analyzed)
+
+
+def make_closure(env, expr, var=None):
+    if not var:
+        var = {}
+    for i in expr:
+        if isinstance(i, Pair):
+            make_closure(env, i, var)
+        else:
+            r = env.get(i)
+            if r is not None:
+                var[i] = r
+    return var

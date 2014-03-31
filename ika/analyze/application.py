@@ -41,19 +41,21 @@ def analyze(analyzer, expr):
 
 
 def tail_call_loop(env, operator, operand):
-        body = None
-        while body is None or isinstance(body, Analyzed):
-            func = operator(env)
-            args = cons_map(lambda a: a(env), operand)
-            if not isinstance(func, Procedure):
-                raise TypeError("%s is not procedure." % str(operator))
-            elif body is None:  # first loop.
-                env = env.extend(func.env.data)
+    body = None
+    while body is None or isinstance(body, Analyzed):
+        func = operator(env)
+        args = cons_map(lambda a: a(env), operand)
+        if not isinstance(func, Procedure):
+            raise TypeError("%s is not procedure." % str(operator))
+        elif body is None:  # first loop.
+            env = env.extend(func.closure)
             body = func.body
-            env.update(arg_zip(func.formal_args, args))
+        env.update(arg_zip(func.formal_args, args))
 
+        while isinstance(body, Analyzed):
             if body.name == __name__:
-                func, args = body.table
+                operator, operand = body.table
+                break
             else:
                 body = body.func(env)
-        return body
+    return body
