@@ -13,7 +13,7 @@ def analyze(analyzer, expr):
 
     def analyzed(env):
         return Procedure(make_closure(env, expr), args, body)
-    return Analyzed(__name__, analyzed)
+    return Analyzed(__name__, analyzed, (args, body))
 
 
 def make_closure(env, expr, var=None):
