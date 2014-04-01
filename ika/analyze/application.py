@@ -10,21 +10,22 @@ def arg_zip(formal, actul, dct=None):
     if dct is None:
         dct = {}
 
-    if not isinstance(formal, List):  # a
-        dct[formal] = actul
-        return dct
-    elif formal is empty:
-        if actul is empty:
+    if actul is not empty:
+        if formal is empty:
+            raise TypeError("Too more actul arguments.")
+        elif not isinstance(formal, List):  # a
+            dct[formal] = actul
+            return dct
+        else:  # normal
+            if formal.car in dct:
+                raise TypeError("repeat formal argument.")
+            dct[formal.car] = actul.car
+            return arg_zip(formal.cdr, actul.cdr, dct)
+    elif actul is empty:  # else
+        if formal is empty:
             return dct
         else:
-            raise TypeError("Too more actul arguments.")
-    elif not isinstance(formal.cdr, List):  # (a . b)
-        dct[formal.cdr] = actul
-    elif actul is empty:
-        raise TypeError("Too less actul arguments.")
-    else:  # normal
-        dct[formal.car] = actul.car
-    return arg_zip(formal.cdr, actul.cdr, dct)
+            raise TypeError("Too less actul arguments.")
 
 
 def analyze(analyzer, expr):
