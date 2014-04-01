@@ -21,4 +21,4 @@ def analyze(analyzer, expr):
             return alternate
         else:
             return empty
-    return Analyzed(__name__, analyzed)
+    return Analyzed(__name__, analyzed, (test, consequent, alernate))
