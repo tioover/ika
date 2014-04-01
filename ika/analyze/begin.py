@@ -13,4 +13,4 @@ def analyze(analyzer, expr):
         while seq.cdr is not empty:
             seq(env)
         return seq.car
-    return Analyzed(__name__, analyzed)
+    return Analyzed(__name__, analyzed, seq)
