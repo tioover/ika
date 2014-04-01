@@ -15,4 +15,4 @@ def analyze(analyzer, expr):
     def analyzed(env):
         return func(*list(cons_map(lambda a: a(env), args)))
 
-    return Analyzed(__name__, analyzed)
+    return Analyzed(__name__, analyzed, (func, args))
