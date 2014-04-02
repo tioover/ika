@@ -6,24 +6,24 @@ def condition(expr):
     return isinstance(expr, List)
 
 
-def arg_zip(formal, actul, dct=None):
-    if dct is None:
-        dct = {}
+def arg_zip(formal, actul, dict_=None):
+    if dict_ is None:
+        dict_ = {}
 
     if actul is not empty:
         if formal is empty:
             raise TypeError("Too more actul arguments.")
         elif not isinstance(formal, List):  # a
-            dct[formal] = actul
-            return dct
+            dict_[formal] = actul
+            return dict_
         else:  # normal
-            if formal.car in dct:
+            if formal.car in dict_:
                 raise TypeError("repeat formal argument.")
-            dct[formal.car] = actul.car
-            return arg_zip(formal.cdr, actul.cdr, dct)
+            dict_[formal.car] = actul.car
+            return arg_zip(formal.cdr, actul.cdr, dict_)
     elif actul is empty:  # else
         if formal is empty:
-            return dct
+            return dict_
         else:
             raise TypeError("Too less actul arguments.")
 
