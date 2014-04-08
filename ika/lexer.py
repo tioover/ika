@@ -11,7 +11,7 @@ remove_re = re.compile(remove_pattern)
 def token_gen(raw):
     while raw:
         # remove space and comment.
-        remove_match = remove_re.match(row)
+        remove_match = remove_re.match(raw)
         if remove_match:
             raw = raw[remove_match.end():]
             continue
