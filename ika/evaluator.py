@@ -19,8 +19,10 @@ def judgement(expr):
 
     for handler in pipeline:
         if handler.condition(expr):
-            return handler
-    raise ValueError("expr can't inpterpretation.")
+            break
+    else:
+        raise ValueError("expr can't inpterpretation.")
+    return handler
 
 
 def analyzer(expr):
@@ -28,6 +30,6 @@ def analyzer(expr):
 
 
 def eval_(s_exp, env, end=None):
-    rtn = analyzer(s_exp)(env)
-    if end:
-        end(rtn)
+    result_value = analyzer(s_exp)(env)
+    if end is not None:
+        print(result_value)
