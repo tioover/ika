@@ -8,12 +8,11 @@ class Singleton:
         return cls._instance
 
 
-class PreFlag(Singleton):
-    '''PRE interpretation flag.'''
+class Flag():
     pass
 
 
-pyapply_flag = PreFlag()
+pyapply_flag = Flag()
 
 
 class Ptr:
