@@ -2,11 +2,10 @@ from ..struct import Analyzed, empty
 from ..utils import tagged, get_operand, cons_map
 
 
-def condition(expr):
-    return tagged(expr, "begin")
-
-
 def analyze(analyzer, expr):
+    if not tagged(expr, "begin"):
+        return None
+
     seq = cons_map(analyzer, get_operand(expr))
 
     def analyzed(env):

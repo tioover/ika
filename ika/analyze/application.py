@@ -3,6 +3,8 @@ from ..utils import get_operand, get_operator, cons_map
 
 
 def condition(expr):
+    if expr is empty:
+        raise SyntaxError("illegal empty application.")
     return isinstance(expr, List)
 
 
@@ -29,9 +31,8 @@ def arg_zip(formal, actul, dict_=None):
 
 
 def analyze(analyzer, expr):
-    if expr is empty:
-        raise SyntaxError("illegal empty application.")
-
+    if not condition(expr):
+        return None
     operator = analyzer(get_operator(expr))
     operand = cons_map(analyzer, get_operand(expr))
 

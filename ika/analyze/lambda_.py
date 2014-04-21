@@ -3,10 +3,6 @@ from ..struct import Procedure, Pair, Analyzed
 from . import begin
 
 
-def condition(expr):
-    return tagged(expr, "lambda")
-
-
 def closure(env, expr, var=None):
     if not var:
         var = {}
@@ -22,6 +18,9 @@ def closure(env, expr, var=None):
 
 
 def analyze(analyzer, expr):
+    if not tagged(expr, "lambda"):
+        return None
+
     args = expr.cdar
     body = begin.analyze(analyzer, Pair("begin", expr.cdr.cdr))
 

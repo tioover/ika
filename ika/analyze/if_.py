@@ -2,11 +2,10 @@ from ..utils import tagged, get_operand
 from ..struct import f, empty, Analyzed
 
 
-def condition(expr):
-    return tagged(expr, "if")
-
-
 def analyze(analyzer, expr):
+    if not tagged(expr, "if"):
+        return None
+
     expr = get_operand(expr)
     test = analyzer(expr.car)
     consequent = analyzer(expr.cdar)

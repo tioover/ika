@@ -2,12 +2,10 @@ from ..utils import tagged
 from ..struct import Pair, Symbol, empty, Analyzed
 from . import self_evaluating
 
-
-def condition(expr):
-    return tagged(expr, "quote")
-
-
 def analyze(analyzer, expr):
+    if not tagged(expr, "quote"):
+        return None
+
     return quote(analyzer, expr.cdar)
 
 

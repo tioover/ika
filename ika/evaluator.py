@@ -2,7 +2,7 @@ from .analyze import application, assignment, begin, cond, definition,\
     if_, lambda_, quoted, self_evaluating, variable, pyapply
 
 
-def judgement(expr):
+def analyzer(expr):
     pipeline = [
         self_evaluating,
         variable,
@@ -18,15 +18,11 @@ def judgement(expr):
     ]
 
     for handler in pipeline:
-        if handler.condition(expr):
-            break
+        analyzed = handler.analyze(analyzer, expr)
+        if analyzed:
+            return analyzed
     else:
         raise ValueError("expr can't inpterpretation.")
-    return handler
-
-
-def analyzer(expr):
-    return judgement(expr).analyze(analyzer, expr)
 
 
 def eval_(s_exp, env, end=None):

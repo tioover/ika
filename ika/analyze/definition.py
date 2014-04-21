@@ -2,11 +2,10 @@ from ..utils import tagged, get_operand
 from ..struct import empty, Analyzed
 
 
-def condition(expr):
-    return tagged(expr, "define")
-
-
 def analyze(analyzer, expr):
+    if not tagged(expr, "define"):
+        return None
+
     def analyzed(env):
         args = get_operand(expr)
         env[args.car] = analyzer(args.cdar)(env)

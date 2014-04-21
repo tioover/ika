@@ -8,6 +8,9 @@ def condition(expr):
 
 
 def analyze(analyzer, expr):
+    if not condition(expr):
+        return None
+
     def analyzed(env):
         return env[expr]
     return Analyzed(__name__, analyzed)
