@@ -1,24 +1,10 @@
-from .analyze import application, assignment, begin, cond, definition,\
-    if_, lambda_, quoted, self_evaluating, variable, pyapply
+from .analyze import pipeline
 
 
 def analyzer(expr):
-    pipeline = [
-        self_evaluating,
-        variable,
-        definition,
-        quoted,
-        lambda_,
-        cond,
-        if_,
-        begin,
-        assignment,
-        pyapply,
-        application,
-    ]
 
     for handler in pipeline:
-        analyzed = handler.analyze(analyzer, expr)
+        analyzed = handler(analyzer, expr)
         if analyzed:
             return analyzed
     else:

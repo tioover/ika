@@ -23,7 +23,7 @@ def analyze(analyzer, expr):
         return None
 
     args = expr.cdar
-    body = begin.analyze(analyzer, Pair("begin", expr.cdr.cdr))
+    body = begin(analyzer, Pair("begin", expr.cdr.cdr))
 
     def analyzed(env):
         return Procedure(closure(env, expr), args, body)
