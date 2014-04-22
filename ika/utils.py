@@ -8,14 +8,14 @@ from .struct import Pair, empty, Analyzed
 
 
 def analysis(analyze):
-    def wrap(*arg):
-        analyzed = analyze(*arg)
+    def wrap(analyzer, expr):
+        analyzed = analyze(analyzer, expr)
         if analyzed is None:
             return None
         elif isinstance(analyzed, tuple):
-            return Analyzed(*analyzed)
+            return Analyzed(expr, *analyzed)
         else:
-            return Analyzed(analyzed)
+            return Analyzed(expr, analyzed)
     return wrap
 
 

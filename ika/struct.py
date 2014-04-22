@@ -30,9 +30,10 @@ class Tree:
 
 class Analyzed:
 
-    def __init__(self, analyzed, table=()):
+    def __init__(self, raw, analyzed, table=()):
         self.analyzed = analyzed
         self.table = table
+        self.raw = raw
 
     @property
     def name(self):
@@ -41,8 +42,11 @@ class Analyzed:
     def __call__(self, env):
         now = self
         while isinstance(now, Analyzed):
-            now = now.analyzed(env)
+            now = now.call(env)
         return now
+
+    def call(self, env):
+        return self.analyzed(env)
 
 
 class ReprMixin:
