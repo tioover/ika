@@ -1,5 +1,5 @@
-from ..utils import tagged
-from ..struct import Procedure, Pair, Analyzed
+from ..utils import tagged, analysis
+from ..struct import Procedure, Pair
 from . import begin
 
 
@@ -17,6 +17,7 @@ def closure(env, expr, var=None):
     return var
 
 
+@analysis
 def analyze(analyzer, expr):
     if not tagged(expr, "lambda"):
         return None
@@ -26,4 +27,4 @@ def analyze(analyzer, expr):
 
     def analyzed(env):
         return Procedure(closure(env, expr), args, body)
-    return Analyzed(__name__, analyzed, (args, body))
+    return analyzed

@@ -1,24 +1,26 @@
-from ..struct import List, t, f, Analyzed
+from ..struct import List, t, f
 from ..const import float_pattern
+from ..utils import analysis
 
-type_dict = {
-    lambda e: e[0] == e[-1] == '"': eval,
-    lambda e: e.isdigit(): int,
-    lambda e: float_pattern.match(e): float,
-    lambda e: e == "#t": lambda e: t,
-    lambda e: e == "#f": lambda e: f,
-}
+type_tuple = (
+    (lambda e: e[0] == e[-1] == '"', eval),
+    (lambda e: e.isdigit(), int),
+    (lambda e: float_pattern.match(e), float),
+    (lambda e: e == "#t", lambda e: t),
+    (lambda e: e == "#f", lambda e: f),
+)
 
 
 def condition(expr):
     if isinstance(expr, List):
         return False
-    for f in type_dict:
+    for f, g in type_tuple:
         if f(expr):
-            return type_dict[f]
+            return g
     return False
 
 
+@analysis
 def analyze(analyzer, expr):
     convert = condition(expr)
     if convert is False:
@@ -26,4 +28,4 @@ def analyze(analyzer, expr):
 
     def analyzed(env):
         return convert(expr)
-    return Analyzed(__name__, analyzed)
+    return analyzed

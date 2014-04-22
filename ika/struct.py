@@ -23,26 +23,25 @@ class Ptr:
 
 
 class Tree:
-    children = []
-
     def __init__(self, data=None, parent=None):
         self.data = data
-        if parent:
-            parent.children.append(self)
         self.parent = parent
 
 
 class Analyzed:
 
-    def __init__(self, name, func, table=()):
-        self.name = name
-        self.func = func
+    def __init__(self, analyzed, table=()):
+        self.analyzed = analyzed
         self.table = table
+
+    @property
+    def name(self):
+        return self.analyzed.__module__
 
     def __call__(self, env):
         now = self
         while isinstance(now, Analyzed):
-            now = now.func(env)
+            now = now.analyzed(env)
         return now
 
 
@@ -146,18 +145,22 @@ class Pair(ReprMixin, List):
 class Procedure(ReprMixin):
     formal_args = None
     body = None
-    closure = {}
+    _closure = {}
 
     def __init__(self, closure, formal_args, body):
         self.formal_args = formal_args
         self.body = body
-        self.closure = closure
+        self._closure = closure
 
     def __call__(self, env):
         self.body(env)
 
     def __repr__(self):
         return "#<procedure>"
+
+    def closure(self, env):
+        env.data.update(self._closure)
+        return env
 
 
 from .utils import dict_map
@@ -194,11 +197,12 @@ class Env(Tree):
                 return True
         return False
 
-    def extend(self, closure=None):
+    def extend(self):
         env = Env(self)
-        if closure:
-            env.data.update(closure)
         return env
 
     def update(self, dict_=None):
         self.data.update(dict_map(Ptr, dict_))
+
+    def clear(self):
+        self.data.clear()

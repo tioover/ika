@@ -1,5 +1,5 @@
-from ..utils import tagged
-from ..struct import Pair, Symbol, empty, Analyzed
+from ..utils import tagged, analysis
+from ..struct import Pair, Symbol, empty
 from . import self_evaluating
 
 def analyze(analyzer, expr):
@@ -8,7 +8,7 @@ def analyze(analyzer, expr):
 
     return quote(analyzer, expr.cdar)
 
-
+@analysis
 def quote(analyzer, expr):
     def analyzed(env):
         if isinstance(expr, Pair):
@@ -20,4 +20,4 @@ def quote(analyzer, expr):
             return expr
         else:
             return Symbol(expr)
-    return Analyzed(__name__, analyzed)
+    return analyzed

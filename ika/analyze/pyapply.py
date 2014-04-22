@@ -1,8 +1,9 @@
-from ..utils import tagged, get_operand, get_operator, cons_map
+from ..utils import tagged, get_operand, get_operator, cons_map, analysis
 from ..procs import base
-from ..struct import pyapply_flag, Analyzed
+from ..struct import pyapply_flag
 
 
+@analysis
 def analyze(analyzer, expr):
     if not tagged(expr, pyapply_flag):
         return None
@@ -14,4 +15,4 @@ def analyze(analyzer, expr):
     def analyzed(env):
         return func(*list(cons_map(lambda a: a(env), args)))
 
-    return Analyzed(__name__, analyzed, (func, args))
+    return analyzed

@@ -1,5 +1,5 @@
 from ..struct import List, empty, Procedure, Analyzed
-from ..utils import get_operand, get_operator, cons_map
+from ..utils import get_operand, get_operator, cons_map, analysis
 
 
 def condition(expr):
@@ -30,33 +30,39 @@ def arg_zip(formal, actul, dict_=None):
             raise TypeError("Too less actul arguments.")
 
 
+@analysis
 def analyze(analyzer, expr):
     if not condition(expr):
         return None
+
     operator = analyzer(get_operator(expr))
     operand = cons_map(analyzer, get_operand(expr))
 
-    return Analyzed(
-        __name__,
+    return (
         lambda env: tail_call_loop(env, operator, operand),
-        table=(operator, operand))
+        (operator, operand),
+    )
 
 
 def tail_call_loop(env, operator, operand):
     now = None
     while True:
         func = operator(env)
-        args = cons_map(lambda a: a(env), operand)
         if not isinstance(func, Procedure):
             raise TypeError("%s is not procedure." % str(operator))
-        elif now is None:  # first loop.
-            env = env.extend(func.closure)
+        args = cons_map(lambda a: a(env), operand)
+
+        if now is None:  # first loop.
+            now_env = env.extend()
             now = func.body
-        env.update(arg_zip(func.formal_args, args))
+
+        now_env.clear()
+        now_env = func.closure(now_env)
+        now_env.update(arg_zip(func.formal_args, args))
 
         while isinstance(now, Analyzed):
             if now.name != __name__:
-                now = now.func(env)
+                now = now.analyzed(now_env)
             else:
                 operator, operand = now.table
                 break  # skip else.

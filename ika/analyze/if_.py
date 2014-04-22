@@ -1,7 +1,7 @@
-from ..utils import tagged, get_operand
-from ..struct import f, empty, Analyzed
+from ..utils import tagged, get_operand, analysis
+from ..struct import f, empty
 
-
+@analysis
 def analyze(analyzer, expr):
     if not tagged(expr, "if"):
         return None
@@ -20,4 +20,4 @@ def analyze(analyzer, expr):
             return alternate
         else:
             return empty
-    return Analyzed(__name__, analyzed, (test, consequent, alernate))
+    return analyzed

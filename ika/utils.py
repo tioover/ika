@@ -4,7 +4,19 @@ def dict_map(func, dict_):
     return dict_
 
 
-from .struct import Pair, empty
+from .struct import Pair, empty, Analyzed
+
+
+def analysis(analyze):
+    def wrap(*arg):
+        analyzed = analyze(*arg)
+        if analyzed is None:
+            return None
+        elif isinstance(analyzed, tuple):
+            return Analyzed(*analyzed)
+        else:
+            return Analyzed(analyzed)
+    return wrap
 
 
 def tagged(expr, name):
