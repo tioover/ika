@@ -1,10 +1,11 @@
 from ..struct import empty, f, pyapply_flag
 from ..utils import tagged, get_operand, get_operator, cons_map, analysis
 from ..procs import base
+from ..evaluator import analyzer
 
 
 @analysis
-def variable(analyzer, expr):
+def variable(expr):
     if not isinstance(expr, str):
         return None
 
@@ -14,7 +15,7 @@ def variable(analyzer, expr):
 
 
 @analysis
-def begin(analyzer, expr):
+def begin(expr):
     if not tagged(expr, "begin"):
         return None
 
@@ -28,7 +29,7 @@ def begin(analyzer, expr):
 
 
 @analysis
-def definition(analyzer, expr):
+def definition(expr):
     if not tagged(expr, "define"):
         return None
 
@@ -40,7 +41,7 @@ def definition(analyzer, expr):
 
 
 @analysis
-def if_(analyzer, expr):
+def if_(expr):
     if not tagged(expr, "if"):
         return None
 
@@ -62,7 +63,7 @@ def if_(analyzer, expr):
 
 
 @analysis
-def pyapply(analyzer, expr):
+def pyapply(expr):
     if not tagged(expr, pyapply_flag):
         return None
 

@@ -1,10 +1,7 @@
-from .analyze import pipeline
-
-
 def analyzer(expr):
-
+    from .analyze import pipeline
     for handler in pipeline:
-        analyzed = handler(analyzer, expr)
+        analyzed = handler(expr)
         if analyzed:
             return analyzed
     else:
@@ -12,6 +9,7 @@ def analyzer(expr):
 
 
 def eval_(s_exp, env, end=None):
+
     result_value = analyzer(s_exp)(env)
     if end is not None:
         print(result_value)

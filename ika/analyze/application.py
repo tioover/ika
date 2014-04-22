@@ -1,5 +1,6 @@
 from ..struct import List, empty, Procedure, Analyzed
 from ..utils import get_operand, get_operator, cons_map, analysis
+from ..evaluator import analyzer
 
 
 def condition(expr):
@@ -9,7 +10,7 @@ def condition(expr):
 
 
 @analysis
-def analyze(analyzer, expr):
+def analyze(expr):
     if not condition(expr):
         return None
 

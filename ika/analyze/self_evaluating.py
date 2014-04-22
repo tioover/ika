@@ -21,7 +21,7 @@ def condition(expr):
 
 
 @analysis
-def analyze(analyzer, expr):
+def analyze(expr):
     convert = condition(expr)
     if convert is False:
         return None

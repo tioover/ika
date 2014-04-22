@@ -1,6 +1,6 @@
 from ..utils import tagged, analysis
 from ..struct import Procedure, Pair
-from . import begin
+from . import begin, analyzer
 
 
 def closure(env, expr, var=None):
@@ -18,12 +18,12 @@ def closure(env, expr, var=None):
 
 
 @analysis
-def analyze(analyzer, expr):
+def analyze(expr):
     if not tagged(expr, "lambda"):
         return None
 
     args = expr.cdar
-    body = begin(analyzer, Pair("begin", expr.cdr.cdr))
+    body = begin(Pair("begin", expr.cdr.cdr))
 
     def analyzed(env):
         return Procedure(closure(env, expr), args, body)
