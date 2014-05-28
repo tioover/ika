@@ -1,26 +1,29 @@
 import re
-from pypeg import parse, blank, restline
-from .struct import Pair
+from pypeg import parse, restline
+from .struct import Pair, String
 
 
-class Id(str):
-    regex = re.compile('[\w!@$%^&*_+-=~]+')
+class Identifier(str):
+    regex = re.compile(r'[\w!@$%^&\.\*_+-=~]+')
 
 
-class Number(int):
-    regex = re.compile('\d\S+')
+class Float(float):
+    grammar = re.compile(r'\d+.\d+')
 
 
-class List(Pair):
-    pass
+class List:
+    def __new__(cls, *args):
+        return Pair(*args)
 
-expr = lambda: [Number, Id, Pair, ]
-Pair.grammar = '(', List, ')'
+
+expr = lambda: [Float, int, String, Identifier, Pair]
 List.grammar = [
-    (expr(), blank, '.', blank, expr()),
+    (expr(), '.', expr()),
     (expr(), List),
-    None,
-]
+    None, ]
+
+String.grammar = '"', re.compile(r'(\\"|[^"])*'), '"'
+Pair.grammar = '(', List, ')'
 
 
 def parser(string):

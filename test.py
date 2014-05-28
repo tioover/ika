@@ -24,10 +24,15 @@ class ParserTestCase(unittest.TestCase):
         )
 
     def test_type(self):
-        log('(1 a 1.1)')
+        def t(s, r):
+            assert parser(s) == r
+        t('abc', 'abc')
+        t('123', 123)
+        t('1.23', 1.23)
+        t('"helo \\" world\\n"', 'helo \\" world\\n')
 
     def test_comment(self):
-        log('42 ;test')
+        log('(42 "test") ;test')
 
 
 class InterpreterTestCase(unittest.TestCase):

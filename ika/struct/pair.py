@@ -1,6 +1,13 @@
-class Empty(tuple):
+class Empty():
     def __repr__(self):
         return '()'
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        raise StopIteration
+
 empty = Empty()
 
 

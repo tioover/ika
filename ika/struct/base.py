@@ -6,3 +6,8 @@ class Singleton:
             cls._instance = super(Singleton, cls).__new__(
                 cls, *args, **kwargs)
         return cls._instance
+
+
+class String(str):
+    def __repr__(self):
+        return '"%s"' % self
