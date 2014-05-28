@@ -43,11 +43,12 @@ def cons(car, cdr):
     return Pair((car, cdr))
 
 
-def lst(items):
+def lst(*items):
     items = list(items)
     tail = cons(items[-1], empty)
     now = tail
     i = len(items) - 2
     while i >= 0:
         now = cons(items[i], now)
+        i -= 1
     return now

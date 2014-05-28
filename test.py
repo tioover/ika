@@ -34,6 +34,10 @@ class ParserTestCase(unittest.TestCase):
     def test_comment(self):
         log('(42 "test") ;test')
 
+    def test_quote(self):
+        log("'(1 2 3)")
+        log("'aaa")
+
 
 class InterpreterTestCase(unittest.TestCase):
     pass
