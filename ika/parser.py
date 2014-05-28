@@ -1,11 +1,12 @@
 from pypeg import Symbol, parse
-from .struct.pair import Pair, Empty
+from .struct.pair import Pair
+
+
 class ListContent(Pair): pass
 class List(Pair): pass
 expr = lambda: [Symbol, List, ]
-Empty.grammar = None
 List.grammar = '(', ListContent, ')'
-ListContent.grammar = [(expr(), ListContent), Empty]
+ListContent.grammar = [(expr(), '.', expr()), (expr(), ListContent), None]
 
 
 def parser(string):

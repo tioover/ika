@@ -13,6 +13,7 @@ class ParserTestCase(unittest.TestCase):
         print(parser('(1 2 3 (4 5 6))'))
         print(parser('(1 2 (3 4 5 6) 7 8)'))
         print(parser('((1 (2 (3 (4)))))'))
+        print(parser('(1 2 3 4 . 5)'))
 
 
 class InterpreterTestCase(unittest.TestCase):
