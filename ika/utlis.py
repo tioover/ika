@@ -1,4 +1,4 @@
-class Framework:
+class Match:
     tested = None
 
     def __init__(self, pipline=None):

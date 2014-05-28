@@ -1,12 +1,18 @@
 import unittest
-
-
-class LexerTestCase(unittest.TestCase):
-    pass
+from ika.parser import parser
 
 
 class ParserTestCase(unittest.TestCase):
-    pass
+    def test_atom(self):
+        print(parser('a'))
+
+    def test_list(self):
+        print(parser('(1 2 3 4 5)'))
+        print(parser('()'))
+        print(parser('((1 2 3) 4 5 6)'))
+        print(parser('(1 2 3 (4 5 6))'))
+        print(parser('(1 2 (3 4 5 6) 7 8)'))
+        print(parser('((1 (2 (3 (4)))))'))
 
 
 class InterpreterTestCase(unittest.TestCase):
