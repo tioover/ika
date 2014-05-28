@@ -375,7 +375,7 @@ class Namespace(_UserDict):
         except:
             pass
         return result + ")"
-        
+
 
 class Enum(Namespace):
     """A Namespace which is being treated as an Enum.

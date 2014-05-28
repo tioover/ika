@@ -5,10 +5,11 @@ empty = Empty()
 
 
 class Pair(tuple):
-    def __new__(cls, *args, **kwargs):
-        if not args or args[0] is empty:
-            return empty
-        return super(Pair, cls).__new__(cls, *args, **kwargs)
+    def __new__(cls, pair=empty):
+        if pair is empty:
+            return pair
+        assert len(pair) == 2
+        return super(Pair, cls).__new__(cls, pair)
 
     @property
     def car(self):
@@ -18,15 +19,28 @@ class Pair(tuple):
     def cdr(self):
         return self[1]
 
-    def __repr__(self, start=True):
-        car = self.car
-        cdr = self.cdr
-        if isinstance(cdr, Pair):
-            expr = '%s %s' % (repr(car), cdr.__repr__(start=False))
-        elif cdr is empty:
-            expr = '%s)' % repr(car)
+    def __repr__(self):
+        car, cdr = self.car, self.cdr
+        expr = '(%s' % repr(car)
+        while isinstance(cdr, Pair):
+            expr += ' ' + repr(cdr.car)
+            cdr = cdr.cdr
+        if cdr is empty:
+            expr += ')'
         else:
-            expr = '%s . %s)' % (repr(car), repr(cdr))
-        if start:
-            expr = '(' + expr
+            expr += ' . %s)' % repr(cdr)
         return expr
+
+
+def cons(car, cdr):
+    return Pair((car, cdr))
+
+
+def lst(items):
+    items = list(items)
+    tail = cons(items[-1], empty)
+    now = tail
+    i = len(items) - 2
+    while i >= 0:
+        now = cons(items[i], now)
+    return now
