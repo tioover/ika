@@ -1,7 +1,11 @@
 import re
 from pypeg import parse, restline, some
 from .struct.types import String, Identifier, Float
-from .struct.pair import Empty, lst
+from .struct.pair import Empty, Pair, lst
+
+
+class Number(int):
+    pass
 
 
 class List:
@@ -17,14 +21,21 @@ class Quote:
         return lst(Identifier('quote'), obj)
 
 
-expr = lambda: [Float, int, String, Identifier, List, Quote]
+class Vector:
+    def __new__(cls, obj):
+        return Pair(Identifier('vector'), obj)
+
+
+expr = lambda: [Float, Number, String, Identifier, List, Quote, Vector]
 
 # Grammar Rule
 Empty.grammar = None
 Identifier.grammar = re.compile(r'[\w!@$%^&\.\*_+-=~]+')
 String.grammar = '"', re.compile(r'(\\"|[^"])*'), '"'
-Float.grammar = re.compile(r'\d+.\d+')
+Number.grammar = re.compile(r'\d+')
+Float.grammar = re.compile(r'\d+\.\d+')
 Quote.grammar = "'", expr()
+Vector.grammar = '#', List
 list_content = [
     (some(expr()),  # list item
         [('.', expr()), Empty]),  # tail item

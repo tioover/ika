@@ -37,6 +37,10 @@ class ParserTestCase(unittest.TestCase):
     def test_quote(self):
         log("'(1 2 3)")
         log("'aaa")
+        log("'()")
+
+    def test_vector(self):
+        log('#(1 2 3 4)')
 
 
 class InterpreterTestCase(unittest.TestCase):
