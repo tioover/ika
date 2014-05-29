@@ -1,38 +1,38 @@
 import re
-from pypeg import parse, restline
-from .struct import Pair, String
-from .struct.pair import lst
-
-
-class Identifier(str):
-    regex = re.compile(r'[\w!@$%^&\.\*_+-=~]+')
-
-    def __repr__(self):
-        return self
-
-
-class Float(float):
-    grammar = re.compile(r'\d+.\d+')
+from pypeg import parse, restline, some
+from .struct.types import String, Identifier, Float
+from .struct.pair import Empty, lst
 
 
 class List:
-    def __new__(cls, *args):
-        return Pair(*args)
+    def __new__(cls, thing):
+        tail = thing.pop()
+        if not thing:
+            return tail
+        return lst(*thing, tail=tail)
 
 
 class Quote:
     def __new__(cls, obj):
         return lst(Identifier('quote'), obj)
 
-expr = lambda: [Float, int, String, Identifier, Pair, Quote]
-Quote.grammar = "'", expr()
-List.grammar = [
-    (expr(), '.', expr()),
-    (expr(), List),
-    None, ]
 
+expr = lambda: [Float, int, String, Identifier, List, Quote]
+
+# Grammar Rule
+Empty.grammar = None
+Identifier.grammar = re.compile(r'[\w!@$%^&\.\*_+-=~]+')
 String.grammar = '"', re.compile(r'(\\"|[^"])*'), '"'
-Pair.grammar = '(', List, ')'
+Float.grammar = re.compile(r'\d+.\d+')
+Quote.grammar = "'", expr()
+list_content = [
+    (some(expr()),  # list item
+        [('.', expr()), Empty]),  # tail item
+    Empty, ]
+List.grammar = [
+    ('(', list_content, ')'),
+    ('[', list_content, ']'),
+    ('{', list_content, '}'), ]
 
 
 def parser(string):
