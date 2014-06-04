@@ -31,6 +31,11 @@ class Pair:
             expr += ' . %s)' % repr(cdr)
         return expr
 
+    def __iter__(self):
+        while isinstance(self, Pair):
+            yield self.car
+            self = self.cdr
+
 
 def lst(*items, tail=empty):
     items = tuple(items)
