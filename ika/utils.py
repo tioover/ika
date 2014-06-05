@@ -1,14 +1,3 @@
-def match():
-    pipeline = []
-    register = lambda *x: pipeline.append(x)
-
-    def handing(*args, **kwargs):
-        for cond, handler in pipeline:
-            if cond(*args, **kwargs):
-                return handler(*args, **kwargs)
-    return register, handing
-
-
 def id(x):
     return x
 

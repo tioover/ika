@@ -1,139 +1,83 @@
-from ..utils import match
-from ..struct.env import Env
-from ..struct.pair import Pair, Empty, lst
+from ..struct.pair import Pair, empty
 from ..struct.function import Function
 from ..struct.types import Identifier
-
-add, analysis = match()
-car_is = lambda x: lambda y, _: y.car == x
+from .backend import Status, sign, register, normal, car_is, compile, compiler
 
 
-class Runtime(dict):
-    least = None
-
-
-def sign(test):
-    def inner(handler):
-        add(test, handler)
-        return handler
-    return inner
-
-
-def register(handler):
-    def wrap(expr, line):
-        analyzed = handler(expr)
-        analyzed.raw = expr
-        line.append(analyzed)
-        return analyzed
-    return wrap
-
-
-def normal(analyzed):
-    def wrap(env, pc, runtime):
-        runtime[wrap.raw] = runtime.least = analyzed(env)
-        return env, pc+1
-    return wrap
-
-
-def rtn(env, *args):
-    return env.parent, env.rtn
-
-
-@sign(lambda e, _: isinstance(e, Identifier))
+@sign(lambda e: isinstance(e, Identifier))
 @register
-def name(expr):
+def name(expr, ir):
     @normal
-    def analyzed(env):
-        while env is not None:
-            if expr in env:
-                return env[expr]
-            env = env.parent
-    return analyzed
+    def obj(st, pc):
+        while st is not None:
+            if expr in st.env:
+                return st.env[expr]
+            st = st.parent
+    return obj
 
 
-@sign(lambda e, _: not isinstance(e, Pair))
+@sign(lambda e: not isinstance(e, Pair))
 @register
-def self_evaluator(expr):
+def self_evaluator(expr, ir):
     @normal
-    def analyzed(env):
+    def obj(st, pc):
         return expr
-    return analyzed
+    return obj
 
 
 @sign(car_is('lambda'))
-def _lambda(expr, line):
-    i = len(line)
-    line.append(None)
+def _lambda(expr, ir):
+    pc = len(ir)
+    ir.append(None)  # Placeholder
 
     args = expr.cdr.car
-    body = expr.cdr.cdr
-    f = Function(args, i+1)
-    analysis(body, line)
-    line.append(rtn)
-    next = len(line)
+    body = expr.cdr.cdr.car
+    func = Function(args, pc+1)
+    compile(body, ir)
+    ir.rtn()
+    i = len(ir)  # skip function body.
 
-    def analyzed(env, pc, runtime):
-        runtime[expr] = runtime.least = f
-        return env, next
+    def function_obj(st, pc):
+        st.values.append(func)
+        return st, i
 
-    line[i] = analyzed
+    ir[pc] = function_obj
 
 
-def argbind(env, runtime, args, operand):
+def args_bind(env, formal, actual):
     while True:
-        if isinstance(args, Pair):
-            env[args.car] = runtime[operand.car]
-            args = args.cdr
-            operand = operand.cdr
-        elif isinstance(args, Empty):
+        if isinstance(formal, Pair):
+            env[formal.car] = actual.car
+            formal = formal.cdr
+            actual = actual.cdr
+        elif formal is empty:
             break
         else:
-            env[args] = lst([runtime[k] for k in operand])
+            env[formal] = actual
 
 
-@sign(lambda e, _: True)
-def application(expr, line):
+@sign(lambda e: True)
+def application(expr, ir):
     operator = expr.car
     operand = expr.cdr
-    analysis(operator, line)
-    for i in operand:
-        analysis(i, line)
 
-    def analyzed(env, pc, runtime):
-        function = runtime[operator]
-        env = Env(env)
-        env.rtn = pc+1
-        argbind(env, runtime, function.args, operand)
-        return env, function.pc
+    for i, e in enumerate(operand):
+        compile(e, ir)
 
-    def receive(env, pc, runtime):
-        env[expr] = runtime.least
-        return env, pc+1
+    def apply(st, pc):
+        args = empty
+        for j in range(i+1):
+            args = Pair(st.values.pop(), args)
+        st, pc = ir[pc+1](st, pc)
+        func = st.values.pop()
+        st = Status(st)
+        st.rtn = pc+1
+        args_bind(st.env, func.args, args)
+        return st, func.pc
 
-    line.append(analyzed)
-    line.append(receive)
-
-
-def analyzer(expr):
-    line = []
-    analysis(expr, line)
-    line.append(rtn)
-
-    def execute(env, cont):
-        pc = 0  # program counter
-        env.rtn = None  # top
-        runtime = Runtime()
-        print(line)
-        while env is not None:
-            print('--')
-            print(line[pc], pc)
-            if hasattr(line[pc], 'raw'):
-                print(line[pc].raw)
-            env, pc = line[pc](env, pc, runtime)
-            print(pc)
-        return cont(runtime.least)
-    return execute
+    ir.append(apply)
+    compile(operator, ir)
 
 
 def eval(expr, env, cont=print):
-    analyzer(expr)(env, cont)
+    compiler(expr)(env, cont)
