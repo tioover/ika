@@ -13,10 +13,9 @@ def id(x):
     return x
 
 
-def none(x):
+def none(*x):
     return None
 
 
-def consmap(f, lst):
-    for i in lst:
-        yield f(i)
+def true(*x):
+    return False

@@ -1,11 +1,15 @@
-from ..utils import match, consmap
+from ..utils import match
 from ..struct.env import Env
-from ..struct.pair import Pair, Empty
+from ..struct.pair import Pair, Empty, lst
+from ..struct.function import Function
+from ..struct.types import Identifier
 
-line = []
-called = False
-val = None
 add, analysis = match()
+car_is = lambda x: lambda y, _: y.car == x
+
+
+class Runtime(dict):
+    least = None
 
 
 def sign(test):
@@ -15,67 +19,119 @@ def sign(test):
     return inner
 
 
-def normal(handler):
-    def wrap(env, pc):
-        global val
-        val = handler(env)
-        pc += 1
-        return env, pc
+def register(handler):
+    def wrap(expr, line):
+        analyzed = handler(expr)
+        analyzed.raw = expr
+        line.append(analyzed)
+        return analyzed
     return wrap
 
 
-def bind(env, formal, actual):
+def normal(analyzed):
+    def wrap(env, pc, runtime):
+        runtime[wrap.raw] = runtime.least = analyzed(env)
+        return env, pc+1
+    return wrap
+
+
+def rtn(env, *args):
+    return env.parent, env.rtn
+
+
+@sign(lambda e, _: isinstance(e, Identifier))
+@register
+def name(expr):
+    @normal
+    def analyzed(env):
+        while env is not None:
+            if expr in env:
+                return env[expr]
+            env = env.parent
+    return analyzed
+
+
+@sign(lambda e, _: not isinstance(e, Pair))
+@register
+def self_evaluator(expr):
+    @normal
+    def analyzed(env):
+        return expr
+    return analyzed
+
+
+@sign(car_is('lambda'))
+def _lambda(expr, line):
+    i = len(line)
+    line.append(None)
+
+    args = expr.cdr.car
+    body = expr.cdr.cdr
+    f = Function(args, i+1)
+    analysis(body, line)
+    line.append(rtn)
+    next = len(line)
+
+    def analyzed(env, pc, runtime):
+        runtime[expr] = runtime.least = f
+        return env, next
+
+    line[i] = analyzed
+
+
+def argbind(env, runtime, args, operand):
     while True:
-        if isinstance(formal, Pair):
-            env[formal.car] = actual.car
-            formal = formal.cdr
-            actual = actual.cdr
-        elif isinstance(actual, Empty):
+        if isinstance(args, Pair):
+            env[args.car] = runtime[operand.car]
+            args = args.cdr
+            operand = operand.cdr
+        elif isinstance(args, Empty):
             break
         else:
-            env[formal] = actual
+            env[args] = lst([runtime[k] for k in operand])
 
 
-@sign(lambda e: isinstance(e, Pair))
-def application(expr):
+@sign(lambda e, _: True)
+def application(expr, line):
     operator = expr.car
     operand = expr.cdr
-    analysis(operand)
-    for e in operand:
-        analysis(e)
+    analysis(operator, line)
+    for i in operand:
+        analysis(i, line)
 
-    def analyzed(env, pc):
-        function = env.runtime[operator]
-        args = consmap(lambda k: env.runtime[k], operand)
-        if called is True:
-            global called, val
-            called = False
-            env[expr] = val
-            return env, pc+1
+    def analyzed(env, pc, runtime):
+        function = runtime[operator]
         env = Env(env)
-        env.rtn = (env.parent, pc)
-        bind(env, function.args, args)
+        env.rtn = pc+1
+        argbind(env, runtime, function.args, operand)
         return env, function.pc
 
+    def receive(env, pc, runtime):
+        env[expr] = runtime.least
+        return env, pc+1
 
-class Return:
-    def __call__(self, env, pc):
-        # env.rtn is tuple : (env, pc)
-        global called
-        called = True
-        return env.rtn
+    line.append(analyzed)
+    line.append(receive)
 
 
 def analyzer(expr):
-    analysis(expr)
+    line = []
+    analysis(expr, line)
+    line.append(rtn)
 
     def execute(env, cont):
-        line.clear()
-        env.rtn = (None, None)  # top
         pc = 0  # program counter
+        env.rtn = None  # top
+        runtime = Runtime()
+        print(line)
         while env is not None:
-            env, pc = line[pc](env, pc)
-        return cont(env.val)
+            print('--')
+            print(line[pc], pc)
+            if hasattr(line[pc], 'raw'):
+                print(line[pc].raw)
+            env, pc = line[pc](env, pc, runtime)
+            print(pc)
+        return cont(runtime.least)
     return execute
 
 
