@@ -32,11 +32,6 @@ class Status:
         self.rtn = None
 
 
-class IR(list):
-    def rtn(self):
-        self.append(rtn)
-
-
 def sign(test):
     def middle(handler):
         add(test, handler)
@@ -59,8 +54,8 @@ def normal(f):
     return instruction
 
 
-def compiler(expr):
-    ir = IR()
+def compiler(ir, expr):
+    i = len(ir)
     compile(expr, ir)
 
     def execute(st, cont):
@@ -68,10 +63,11 @@ def compiler(expr):
         # print(expr)
         # print('Instruction:')
         # for i, item in enumerate(ir):
-            # print(i, item)
-        pc = 0  # program counter
+        #     print(i, item)
+        pc = i  # program counter
         while pc < len(ir):
-            # print('DEBUG: ', pc, st.values, ir[pc])
+            # print('DEBUG: PC', pc, st.values, ir[pc])
             st, pc = ir[pc](st, pc)
-        return cont(st.values.pop())
+        value = st.values.pop()
+        return cont(value)
     return execute

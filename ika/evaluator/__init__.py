@@ -1,7 +1,6 @@
-from ..struct.pair import Pair, empty
-from ..struct.function import Function
-from ..struct.types import Identifier
-from .backend import Status, sign, register, normal, car_is, compile, compiler
+from ..struct import Pair, empty, Identifier, Function
+from .backend import Status, sign, register, normal,\
+    car_is, compile, compiler, rtn
 
 
 @sign(lambda e: isinstance(e, Identifier))
@@ -25,6 +24,20 @@ def self_evaluator(expr, ir):
     return obj
 
 
+@sign(car_is('define'))
+@register
+def definition(expr, ir):
+    name = expr.cdr.car
+    value = expr.cdr.cdr.car
+    compile(value, ir)
+
+    @normal
+    def define(st, pc):
+        st.env[name] = st.values.pop()
+        return empty
+    return define
+
+
 @sign(car_is('lambda'))
 def _lambda(expr, ir):
     pc = len(ir)
@@ -34,7 +47,7 @@ def _lambda(expr, ir):
     body = expr.cdr.cdr.car
     func = Function(args, pc+1)
     compile(body, ir)
-    ir.rtn()
+    ir.append(rtn)
     i = len(ir)  # skip function body.
 
     def function_obj(st, pc):
@@ -79,5 +92,5 @@ def application(expr, ir):
     compile(operator, ir)
 
 
-def eval(expr, env, cont=print):
-    compiler(expr)(env, cont)
+def eval(expr, ir, st, cont=print):
+    return compiler(ir, expr)(st, cont)

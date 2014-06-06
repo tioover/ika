@@ -1,11 +1,6 @@
 import re
 from pypeg import parse, restline, some
-from .struct.types import String, Identifier, Float
-from .struct.pair import Empty, Pair, lst
-
-
-class Number(int):
-    pass
+from .struct import String, Identifier, Number, Float, Pair, Empty
 
 
 class List:
@@ -13,12 +8,14 @@ class List:
         tail = thing.pop()
         if not thing:
             return tail
-        return lst(*thing, tail=tail)
+        while thing:
+            tail = Pair(thing.pop(), tail)
+        return tail
 
 
 class Quote:
     def __new__(cls, obj):
-        return lst(Identifier('quote'), obj)
+        return Pair('quote', Pair(obj))
 
 
 class Vector:
