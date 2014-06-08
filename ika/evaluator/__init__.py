@@ -52,7 +52,8 @@ def _lambda(expr, ir):
     i = len(ir)  # skip function body.
 
     def function_obj(st, pc):
-        func.env = st.env
+        if st:
+            func.env = st.env
         st.values.append(func)
         return st, i
 
