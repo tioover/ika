@@ -62,8 +62,8 @@ def compiler(ir, expr):
         # print('Expr:')
         # print(expr)
         # print('Instruction:')
-        # for i, item in enumerate(ir):
-        #     print(i, item)
+        # for n, item in enumerate(ir):
+        #     print(n, item)
         pc = i  # program counter
         while pc < len(ir):
             # print('DEBUG: PC', pc, st.values, ir[pc])

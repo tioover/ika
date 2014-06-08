@@ -38,7 +38,7 @@ def definition(expr, ir):
     return define
 
 
-@sign(car_is('lambda'))
+@sign(car_is('lambda', '\\', 'λ'))
 def _lambda(expr, ir):
     pc = len(ir)
     ir.append(None)  # Placeholder
@@ -46,6 +46,7 @@ def _lambda(expr, ir):
     args = expr.cdr.car
     body = expr.cdr.cdr.car
     func = Function(args, pc+1)
+
     compile(body, ir)
     ir.append(rtn)
     i = len(ir)  # skip function body.
@@ -76,20 +77,19 @@ def application(expr, ir):
 
     for i, e in enumerate(operand):
         compile(e, ir)
+    compile(operator, ir)
 
     def apply(st, pc):
+        func = st.values.pop()
         args = empty
         for j in range(i+1):
             args = Pair(st.values.pop(), args)
-        st, pc = ir[pc+1](st, pc)
-        func = st.values.pop()
         st = Status(st)
         st.rtn = pc+1
         args_bind(st.env, func.args, args)
         return st, func.pc
 
     ir.append(apply)
-    compile(operator, ir)
 
 
 def eval(expr, ir, st, cont=print):
