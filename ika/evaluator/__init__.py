@@ -52,6 +52,7 @@ def _lambda(expr, ir):
     i = len(ir)  # skip function body.
 
     def function_obj(st, pc):
+        func.env = st.env
         st.values.append(func)
         return st, i
 
@@ -75,6 +76,7 @@ def application(expr, ir):
     operator = expr.car
     operand = expr.cdr
 
+    i = -1
     for i, e in enumerate(operand):
         compile(e, ir)
     compile(operator, ir)
@@ -84,8 +86,13 @@ def application(expr, ir):
         args = empty
         for j in range(i+1):
             args = Pair(st.values.pop(), args)
-        st = Status(st)
-        st.rtn = pc+1
+        nextpc = pc + 1
+        if nextpc < len(ir) and ir[nextpc] is rtn:  # tail call
+            nextpc = st.rtn
+        else:
+            st = Status(st)
+            st.rtn = pc+1
+        st.env = func.env
         args_bind(st.env, func.args, args)
         return st, func.pc
 
