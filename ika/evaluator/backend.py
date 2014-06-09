@@ -22,6 +22,10 @@ def rtn(st, pc):
     st.parent.values.append(st.values.pop())
     return st.parent, st.rtn
 
+class Ref:
+    def __init__(self, value):
+        self.value = value
+
 
 class Status:
     ''' Status tree. '''
@@ -30,6 +34,21 @@ class Status:
         self.env = {}
         self.values = []
         self.rtn = None
+
+    def __getitem__(self, k):
+        ref = self.getref(k)
+        if ref is None:
+            raise KeyError('"%d" not in env.' % k)
+        return ref.value
+
+    def __setitem__(self, k, v):
+        self.env[k] = Ref(v)
+
+    def getref(st, k, default=None):
+        while st:
+            if k in st.env:
+                return st.env[k]
+            st = st.parent
 
 
 def sign(test):

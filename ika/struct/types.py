@@ -24,4 +24,4 @@ class Function:
     def __init__(self, args, pc):
         self.args = args
         self.pc = pc
-        self.env = None
+        self.closure = {}

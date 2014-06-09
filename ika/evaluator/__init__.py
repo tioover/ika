@@ -1,6 +1,7 @@
 from ..struct import Pair, empty, Identifier, Function
 from .backend import Status, sign, register, normal,\
     car_is, compile, compiler, rtn
+from ..utils import release
 
 
 @sign(lambda e: isinstance(e, Identifier))
@@ -8,10 +9,7 @@ from .backend import Status, sign, register, normal,\
 def name(expr, ir):
     @normal
     def obj(st, pc):
-        while st is not None:
-            if expr in st.env:
-                return st.env[expr]
-            st = st.parent
+        return st[expr]
     return obj
 
 
@@ -33,12 +31,12 @@ def definition(expr, ir):
 
     @normal
     def define(st, pc):
-        st.env[name] = st.values.pop()
+        st[name] = st.values.pop()
         return empty
     return define
 
 
-@sign(car_is('lambda', '\\', 'λ'))
+@sign(car_is('lambda'))
 def _lambda(expr, ir):
     pc = len(ir)
     ir.append(None)  # Placeholder
@@ -52,24 +50,25 @@ def _lambda(expr, ir):
     i = len(ir)  # skip function body.
 
     def function_obj(st, pc):
-        if st:
-            func.env = st.env
+        for atom in release(body):
+            if isinstance(atom, Identifier):
+                ref = st.getref(atom)
+                if ref is not None:
+                    func.closure[atom] = ref
+
         st.values.append(func)
         return st, i
 
     ir[pc] = function_obj
 
 
-def args_bind(env, formal, actual):
-    while True:
-        if isinstance(formal, Pair):
-            env[formal.car] = actual.car
-            formal = formal.cdr
-            actual = actual.cdr
-        elif formal is empty:
-            break
-        else:
-            env[formal] = actual
+def bound(env, formal, actual):
+    while isinstance(formal, Pair):
+        env[formal.car] = actual.car
+        formal = formal.cdr
+        actual = actual.cdr
+    if formal is not empty:
+        env[formal] = actual
 
 
 @sign(lambda e: True)
@@ -77,24 +76,26 @@ def application(expr, ir):
     operator = expr.car
     operand = expr.cdr
 
-    i = -1
-    for i, e in enumerate(operand):
+    unbound = 0
+    for e in operand:
         compile(e, ir)
+        unbound += 1
     compile(operator, ir)
 
     def apply(st, pc):
+        pc += 1
         func = st.values.pop()
         args = empty
-        for j in range(i+1):
+        for i in range(unbound):
             args = Pair(st.values.pop(), args)
-        nextpc = pc + 1
-        if nextpc < len(ir) and ir[nextpc] is rtn:  # tail call
-            nextpc = st.rtn
+        if pc < len(ir) and ir[pc] is rtn:  # tail call
+            st.values.clear()
         else:
             st = Status(st)
-            st.rtn = pc+1
-        st.env = func.env
-        args_bind(st.env, func.args, args)
+            st.rtn = pc
+
+        st.env = func.closure.copy()
+        bound(st, func.args, args)
         return st, func.pc
 
     ir.append(apply)
