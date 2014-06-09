@@ -44,6 +44,16 @@ class Status:
     def __setitem__(self, k, v):
         self.env[k] = Ref(v)
 
+    def __call__(self):
+        return self.values.pop()
+
+    def setref(self, k, v):
+        ref = self.getref(k)
+        if ref is not None:
+            ref.value = v
+        else:
+            raise NameError('%s is not defined.' % k)
+
     def getref(st, k, default=None):
         while st:
             if k in st.env:
@@ -87,6 +97,6 @@ def compiler(ir, expr):
         while pc < len(ir):
             # print('DEBUG: PC', pc, st.values, ir[pc])
             st, pc = ir[pc](st, pc)
-        value = st.values.pop()
+        value = st()
         return cont(value)
     return execute

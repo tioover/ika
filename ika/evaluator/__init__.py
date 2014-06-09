@@ -31,9 +31,43 @@ def definition(expr, ir):
 
     @normal
     def define(st, pc):
-        st[name] = st.values.pop()
+        st[name] = st()
         return empty
     return define
+
+
+@sign(car_is('set!'))
+@register
+def assign(expr, ir):
+    k = expr.cdr.car
+    v = expr.cdr.cdr.car
+    compile(v, ir)
+
+    @normal
+    def set(st, pc):
+        v = st()
+        st.setref(k, v)
+        return empty
+    return set
+
+
+@sign(car_is('begin'))
+@register
+def begin(expr, ir):
+    expr = expr.cdr
+    n = 0
+    for e in expr:
+        compile(e, ir)
+        n += 1
+
+    @normal
+    def getlast(st, pc):
+        v = st()
+        i = n - 1
+        for j in range(i):
+            st()
+        return v
+    return getlast
 
 
 @sign(car_is('lambda'))
@@ -42,10 +76,10 @@ def _lambda(expr, ir):
     ir.append(None)  # Placeholder
 
     args = expr.cdr.car
-    body = expr.cdr.cdr.car
+    body = expr.cdr.cdr
     func = Function(args, pc+1)
 
-    compile(body, ir)
+    compile(Pair('begin', body), ir)
     ir.append(rtn)
     i = len(ir)  # skip function body.
 
@@ -84,10 +118,10 @@ def application(expr, ir):
 
     def apply(st, pc):
         pc += 1
-        func = st.values.pop()
+        func = st()
         args = empty
         for i in range(unbound):
-            args = Pair(st.values.pop(), args)
+            args = Pair(st(), args)
         if pc < len(ir) and ir[pc] is rtn:  # tail call
             st.values.clear()
         else:

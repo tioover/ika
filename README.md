@@ -7,10 +7,11 @@ Yet another LISP Interpreter.
 
 - basic fake compiler.
 - lambda and apply.
+- begin, set!
+- closure
 
 ## TODO
 
-- if, begin, set!, ...
-- closure
+- if, cond, ...
 - call/cc
 - macro
