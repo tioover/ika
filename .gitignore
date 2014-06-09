@@ -38,3 +38,7 @@ nosetests.xml
 
 .tags
 *.taghl
+
+
+# IDEA
+.idea

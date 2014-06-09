@@ -1,4 +1,3 @@
-'''REPL'''
 from ika.parser import parser
 from ika.evaluator import Status, eval
 

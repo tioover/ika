@@ -54,7 +54,8 @@ class Status:
         else:
             raise NameError('%s is not defined.' % k)
 
-    def getref(st, k, default=None):
+    def getref(self, k, default=None):
+        st = self
         while st:
             if k in st.env:
                 return st.env[k]
@@ -70,17 +71,11 @@ def sign(test):
 
 def register(handler):
     def wrap(expr, ir):
-        compiled = handler(expr, ir)
-        ir.append(compiled)
-        return compiled
+        command = handler(expr, ir)
+        ir.append(command)
+        return command
     return wrap
 
-
-def normal(f):
-    def instruction(st, pc):
-        st.values.append(f(st, pc))
-        return st, pc+1
-    return instruction
 
 
 def compiler(ir, expr):
@@ -96,7 +91,8 @@ def compiler(ir, expr):
         pc = i  # program counter
         while pc < len(ir):
             # print('DEBUG: PC', pc, st.values, ir[pc])
-            st, pc = ir[pc](st, pc)
+            instruction, args = ir[pc]
+            st, pc = instruction(st, pc, *args)
         value = st()
         return cont(value)
     return execute
