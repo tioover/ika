@@ -9,9 +9,9 @@ Yet another LISP Interpreter.
 - lambda and apply.
 - begin, set!
 - closure
+- call/cc
 
 ## TODO
 
-- if, cond, ...
-- call/cc
 - macro
+- if, car, cdr, cons, pair?, atom?, ...

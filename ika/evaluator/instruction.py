@@ -1,5 +1,6 @@
 from ika.evaluator import rtn, Status
 from ika.struct import empty, Identifier, Pair
+from ika.struct.types import Cont
 from ika.utils import release
 
 
@@ -29,7 +30,7 @@ def define(st, pc, key):
 @normal
 def set_value(st, pc, key):
     value = st()
-    st.setref(key, value)
+    st.set_ref(key, value)
     return empty
 
 
@@ -42,10 +43,15 @@ def begin(st, pc, num):
     return value
 
 
+@normal
+def callcc(st, pc):
+    return Cont()
+
+
 def lambda_(st, pc, next_pc, body, func):
     for atom in release(body):
         if isinstance(atom, Identifier):
-            ref = st.getref(atom)
+            ref = st.get_ref(atom)
             if ref is not None:
                 func.closure[atom] = ref
 
@@ -62,12 +68,27 @@ def bound(env, formal, actual):
         env[formal] = actual
 
 
-def apply(st, pc, ir, unbound):
+def apply(st, pc, ir, unbound, apply_with_cont=False):
     pc += 1
     func = st()
+
+    # cont jump.
+    if isinstance(func, Cont):
+        value = st()
+        st.values.clear()
+        func.st.values.append(value)
+        return func.st, func.pc
+
     args = empty
     for i in range(unbound):
         args = Pair(st(), args)
+
+    # call/cc
+    if apply_with_cont:
+        cont = args.car
+        cont.pc = pc
+        cont.st = st
+
     if pc < len(ir) and ir[pc][0] is rtn:  # tail call
         st.values.clear()
     else:

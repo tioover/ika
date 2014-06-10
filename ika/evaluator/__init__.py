@@ -1,4 +1,5 @@
-from ..struct import Pair, empty, Identifier, Function
+from ika.struct.types import Cont
+from ..struct import Pair, Identifier, Function, empty
 from .backend import Status, sign, register, car_is, compile, compiler, rtn
 from . import instruction
 
@@ -18,10 +19,10 @@ def self_evaluator(expr, ir):
 @sign(car_is('define'))
 @register
 def definition(expr, ir):
-    name = expr.cdr.car
+    key = expr.cdr.car
     value = expr.cdr.cdr.car
     compile(value, ir)
-    return instruction.define, (name,)
+    return instruction.define, (key,)
 
 
 @sign(car_is('set!'))
@@ -42,6 +43,13 @@ def begin(expr, ir):
         compile(e, ir)
         n += 1
     return instruction.begin, (n,)
+
+
+@sign(car_is('call/cc'))
+def callcc(expr, ir):
+    ir.append((instruction.callcc, ()))
+    compile(expr.cdr.car, ir)
+    ir.append((instruction.apply, (ir, 1, True)))
 
 
 @sign(car_is('lambda'))
@@ -73,5 +81,31 @@ def application(expr, ir):
     ir.append((instruction.apply, (ir, unbound)))
 
 
-def eval(expr, ir, st, cont=print):
-    return compiler(ir, expr)(st, cont)
+def output(expr):
+    if expr is not empty:
+        print(expr)
+
+
+def evaluator(cont=output):
+    # ir = []
+    # st = Status()
+
+    # def eval(expr):
+    #     return compiler(ir, expr)(st, cont)
+    # return eval
+    ir = []
+    status = Status()
+
+    def eval_(expr):
+        pc = len(ir)
+        st = status
+        if expr is not None:
+            compile(expr, ir)
+        ir.append((rtn, ()))
+        while True:
+            instruction, arguments = ir[pc]
+            if instruction is rtn and st.parent is None:
+                break
+            st, pc = instruction(st, pc, *arguments)
+        return cont(st())
+    return eval_

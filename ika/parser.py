@@ -1,6 +1,6 @@
 import re
 from pypeg import parse, restline, some, omit
-from .struct import String, Identifier, Number, Float, Pair, Empty
+from .struct import String, Identifier, Number, Float, Pair, Empty, empty
 
 
 class List:
@@ -15,6 +15,8 @@ class List:
 
 class Quote:
     def __new__(cls, obj):
+        if obj is empty:
+            return empty
         return Pair('quote', Pair(obj))
 
 

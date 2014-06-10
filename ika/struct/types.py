@@ -25,3 +25,10 @@ class Function:
         self.args = args
         self.pc = pc
         self.closure = {}
+
+
+class Cont(Function):
+    def __init__(self):
+        self.args = None
+        self.st = None
+        self.pc = None

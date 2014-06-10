@@ -36,10 +36,7 @@ class Status:
         self.rtn = None
 
     def __getitem__(self, k):
-        ref = self.getref(k)
-        if ref is None:
-            raise KeyError('"%d" not in env.' % k)
-        return ref.value
+        return self.env[k].value
 
     def __setitem__(self, k, v):
         self.env[k] = Ref(v)
@@ -47,14 +44,14 @@ class Status:
     def __call__(self):
         return self.values.pop()
 
-    def setref(self, k, v):
-        ref = self.getref(k)
+    def set_ref(self, k, v):
+        ref = self.get_ref(k)
         if ref is not None:
             ref.value = v
         else:
             raise NameError('%s is not defined.' % k)
 
-    def getref(self, k, default=None):
+    def get_ref(self, k, default=None):
         st = self
         while st:
             if k in st.env:
@@ -77,7 +74,6 @@ def register(handler):
     return wrap
 
 
-
 def compiler(ir, expr):
     i = len(ir)
     compile(expr, ir)
@@ -87,12 +83,14 @@ def compiler(ir, expr):
         # print(expr)
         # print('Instruction:')
         # for n, item in enumerate(ir):
-        #     print(n, item)
+            # print(n, item)
         pc = i  # program counter
         while pc < len(ir):
             # print('DEBUG: PC', pc, st.values, ir[pc])
             instruction, args = ir[pc]
             st, pc = instruction(st, pc, *args)
+            if st.parent is None and st.values:
+                break
         value = st()
         return cont(value)
     return execute

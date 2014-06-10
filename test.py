@@ -1,22 +1,20 @@
 import unittest
 import logging
 from ika.parser import parser
-from ika.evaluator import Status, compiler
-from ika.struct import Function
+from ika.evaluator import evaluator
+from ika.struct import Function, empty
 from ika.utils import id
 
 
+eval_ = evaluator(id)
+
+
 class InterpreterTestCase(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        self.st = Status()
-        self.ir = []
-        super(InterpreterTestCase, self).__init__(*args, **kwargs)
-
     def eval(self, expr):
-        return compiler(self.ir, parser(expr))(self.st, id)
+        return eval_(parser(expr))
 
-    def log(self, str):
-        logging.info(str)
+    def log(self, string):
+        logging.info(string)
 
     def test_lambda(self):
         assert isinstance(self.eval('(lambda (a b c) a)'), Function)
@@ -29,6 +27,14 @@ class InterpreterTestCase(unittest.TestCase):
 
     def test_closure(self):
         assert self.eval('(((lambda (x) (lambda () 42)) 42))') == 42
+
+    def test_callcc(self):
+        self.eval('(define a 0)')
+        self.eval('(define b 0)')
+        self.eval('(set! a (call/cc (lambda (cc) (set! b cc))))')
+        assert self.eval('a') is empty
+        self.eval('(b 42)')
+        assert self.eval('a') == 42
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
