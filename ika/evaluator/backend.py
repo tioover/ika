@@ -18,31 +18,28 @@ def car_is(*name):
     return wrap
 
 
-def rtn(st, pc):
-    st.parent.values.append(st.values.pop())
-    return st.parent, st.rtn
+def rtn(env, pc, values):
+    assert values[1] == ()
+    pc, rtn_values = env.rtn
+    return env.parent, pc, (values[0], rtn_values)
+
 
 class Ref:
     def __init__(self, value):
         self.value = value
 
 
-class Status:
-    ''' Status tree. '''
+class Env:
     def __init__(self, parent=None):
         self.parent = parent
-        self.env = {}
-        self.values = []
-        self.rtn = None
+        self.data = {}
+        self.rtn = (None, None)
 
     def __getitem__(self, k):
-        return self.env[k].value
+        return self.data[k].value
 
     def __setitem__(self, k, v):
-        self.env[k] = Ref(v)
-
-    def __call__(self):
-        return self.values.pop()
+        self.data[k] = Ref(v)
 
     def set_ref(self, k, v):
         ref = self.get_ref(k)
@@ -54,9 +51,10 @@ class Status:
     def get_ref(self, k, default=None):
         st = self
         while st:
-            if k in st.env:
-                return st.env[k]
+            if k in st.data:
+                return st.data[k]
             st = st.parent
+        return None
 
 
 def sign(test):
@@ -72,25 +70,3 @@ def register(handler):
         ir.append(command)
         return command
     return wrap
-
-
-def compiler(ir, expr):
-    i = len(ir)
-    compile(expr, ir)
-
-    def execute(st, cont):
-        # print('Expr:')
-        # print(expr)
-        # print('Instruction:')
-        # for n, item in enumerate(ir):
-            # print(n, item)
-        pc = i  # program counter
-        while pc < len(ir):
-            # print('DEBUG: PC', pc, st.values, ir[pc])
-            instruction, args = ir[pc]
-            st, pc = instruction(st, pc, *args)
-            if st.parent is None and st.values:
-                break
-        value = st()
-        return cont(value)
-    return execute

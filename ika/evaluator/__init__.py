@@ -1,6 +1,6 @@
 from ika.struct.types import Cont
 from ..struct import Pair, Identifier, Function, empty
-from .backend import Status, sign, register, car_is, compile, compiler, rtn
+from .backend import Env, sign, register, car_is, compile, rtn
 from . import instruction
 
 
@@ -20,9 +20,10 @@ def self_evaluator(expr, ir):
 @register
 def definition(expr, ir):
     key = expr.cdr.car
+    ir.append((instruction.define_empty, (key,)))
     value = expr.cdr.cdr.car
     compile(value, ir)
-    return instruction.define, (key,)
+    return instruction.set_value, (key,)
 
 
 @sign(car_is('set!'))
@@ -69,6 +70,7 @@ def lambda_(expr, ir):
 
 
 @sign(lambda e: True)
+@register
 def application(expr, ir):
     operator = expr.car
     operand = expr.cdr
@@ -78,7 +80,7 @@ def application(expr, ir):
         compile(e, ir)
         unbound += 1
     compile(operator, ir)
-    ir.append((instruction.apply, (ir, unbound)))
+    return instruction.apply, (ir, unbound)
 
 
 def output(expr):
@@ -87,25 +89,27 @@ def output(expr):
 
 
 def evaluator(cont=output):
-    # ir = []
-    # st = Status()
-
-    # def eval(expr):
-    #     return compiler(ir, expr)(st, cont)
-    # return eval
     ir = []
-    status = Status()
+    env_ = Env()
 
     def eval_(expr):
         pc = len(ir)
-        st = status
+        env = env_
+        values = ()
+
         if expr is not None:
             compile(expr, ir)
         ir.append((rtn, ()))
         while True:
-            instruction, arguments = ir[pc]
-            if instruction is rtn and st.parent is None:
+            function, arguments = ir[pc]
+            print(pc, values, function)
+            if function is rtn and env.parent is None:
                 break
-            st, pc = instruction(st, pc, *arguments)
-        return cont(st())
+            elif function is instruction.self_evaluator:
+                pc += 1
+                values = (arguments[0], values)
+            else:
+                env, pc, values = function(env, pc, values, *arguments)
+            print(values)
+        return cont(values[0])
     return eval_

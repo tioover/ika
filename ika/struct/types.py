@@ -28,7 +28,8 @@ class Function:
 
 
 class Cont(Function):
-    def __init__(self):
+    def __init__(self, values):
         self.args = None
-        self.st = None
+        self.values = values
+        self.env = None
         self.pc = None

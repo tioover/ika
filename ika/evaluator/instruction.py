@@ -1,62 +1,47 @@
-from ika.evaluator import rtn, Status
+from ika.evaluator import rtn, Env
 from ika.struct import empty, Identifier, Pair
 from ika.struct.types import Cont
 from ika.utils import release
 
 
-def normal(f):
-    def instruction(st, pc, *args):
-        st.values.append(f(st, pc, *args))
-        return st, pc+1
-    return instruction
+def name(env, pc, values, expr):
+    return env, pc+1, (env[expr], values)
 
 
-@normal
-def name(st, pc, expr):
-    return st[expr]
+def self_evaluator(env, pc, values, expr):
+    return env, pc+1, (expr, values)
 
 
-@normal
-def self_evaluator(st, pc, expr):
-    return expr
+def define_empty(env, pc, values, key):
+    env[key] = empty
+    return env, pc+1, values
 
 
-@normal
-def define(st, pc, key):
-    st[key] = st()
-    return empty
+def set_value(env, pc, values, key):
+    v, values = values
+    env.set_ref(key, v)
+    return env, pc+1, (empty, values)
 
 
-@normal
-def set_value(st, pc, key):
-    value = st()
-    st.set_ref(key, value)
-    return empty
-
-
-@normal
-def begin(st, pc, num):
-    value = st()
+def begin(env, pc, values, num):
+    v, values = values
     num -= 1
     for i in range(num):
-        st()
-    return value
+        values = values[1]
+    return env, pc+1, (v, values)
 
 
-@normal
-def callcc(st, pc):
-    return Cont()
+def callcc(env, pc, values):
+    return env, pc+1, (Cont(values), values)
 
 
-def lambda_(st, pc, next_pc, body, func):
+def lambda_(env, pc, values, next_pc, body, func):
     for atom in release(body):
         if isinstance(atom, Identifier):
-            ref = st.get_ref(atom)
+            ref = env.get_ref(atom)
             if ref is not None:
                 func.closure[atom] = ref
-
-    st.values.append(func)
-    return st, next_pc
+    return env, next_pc, (func, values)
 
 
 def bound(env, formal, actual):
@@ -68,33 +53,35 @@ def bound(env, formal, actual):
         env[formal] = actual
 
 
-def apply(st, pc, ir, unbound, apply_with_cont=False):
+def apply(env, pc, values, ir, unbound, apply_with_cont=False):
     pc += 1
-    func = st()
+    func, values = values
 
     # cont jump.
     if isinstance(func, Cont):
-        value = st()
-        st.values.clear()
-        func.st.values.append(value)
-        return func.st, func.pc
+        value, values = values
+        return func.env, func.pc, (value, func.values)
 
     args = empty
     for i in range(unbound):
-        args = Pair(st(), args)
+        arg, values = values
+        args = Pair(arg, args)
 
     # call/cc
     if apply_with_cont:
         cont = args.car
         cont.pc = pc
-        cont.st = st
+        cont.env = env
+        cont.values = values
 
+    print(pc, env, env.parent, env.data)
+    for i, ins in enumerate(ir):
+        print(i, ins)
     if pc < len(ir) and ir[pc][0] is rtn:  # tail call
-        st.values.clear()
+        print('tail call')
     else:
-        st = Status(st)
-        st.rtn = pc
-
-    st.env = func.closure.copy()
-    bound(st, func.args, args)
-    return st, func.pc
+        env = Env(env)
+        env.rtn = (pc, values)
+    env.data = func.closure.copy()
+    bound(env, func.args, args)
+    return env, func.pc, ()
