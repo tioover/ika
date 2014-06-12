@@ -50,7 +50,7 @@ def begin(expr, ir):
 def callcc(expr, ir):
     ir.append((instruction.callcc, ()))
     compile(expr.cdr.car, ir)
-    ir.append((instruction.apply, (ir, 1, True)))
+    ir.append((instruction.apply, (ir, 1)))
 
 
 @sign(car_is('lambda'))
@@ -102,7 +102,7 @@ def evaluator(cont=output):
         ir.append((rtn, ()))
         while True:
             function, arguments = ir[pc]
-            print(pc, values, function)
+            # print(pc, values, function)
             if function is rtn and env.parent is None:
                 break
             elif function is instruction.self_evaluator:
@@ -110,6 +110,5 @@ def evaluator(cont=output):
                 values = (arguments[0], values)
             else:
                 env, pc, values = function(env, pc, values, *arguments)
-            print(values)
         return cont(values[0])
     return eval_
