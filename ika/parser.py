@@ -1,6 +1,11 @@
 import re
 from pypeg import parse, restline, some, omit
-from .struct import String, Identifier, Number, Float, Pair, Empty, empty
+from .struct import String, Identifier, Number, Float, Pair
+
+
+class Empty:
+    def __new__(cls):
+        return ()
 
 
 class List:
@@ -9,20 +14,20 @@ class List:
         if not thing:
             return tail
         while thing:
-            tail = Pair(thing.pop(), tail)
+            tail = Pair((thing.pop(), tail))
         return tail
 
 
 class Quote:
     def __new__(cls, obj):
-        if obj is empty:
-            return empty
-        return Pair('quote', Pair(obj))
+        if obj is ():
+            return ()
+        return Pair(('quote', Pair(obj)))
 
 
 class Vector:
     def __new__(cls, obj):
-        return Pair(Identifier('vector'), obj)
+        return Pair((Identifier('vector'), obj))
 
 
 expr = lambda: [Float, Number, String, Identifier, List, Quote, Vector]

@@ -12,7 +12,7 @@ def compile(expr, ir):
 def car_is(*name):
     def wrap(expr):
         for i in name:
-            if expr.car == i:
+            if expr[0] == i:
                 return True
         return False
     return wrap

@@ -1,6 +1,6 @@
 from .types import Function, Quote, Float, Identifier, String, Number
-from .pair import Empty, empty, Pair
+from .pair import Pair
 
 
 __all__ = ['Function', 'Quote', 'Float', 'Identifier', 'String',
-           'Number', 'Empty', 'empty', 'Pair']
+           'Number', 'Empty', 'Pair']

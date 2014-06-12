@@ -1,43 +1,25 @@
-from .base import Singleton
-
-
-class Empty(Singleton):
+class Pair(tuple):
     def __repr__(self):
-        return '()'
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        raise StopIteration
-
-empty = Empty()
-
-
-class Pair:
-    def __init__(self, car, cdr):
-        self.car = car
-        self.cdr = cdr
-
-    def __repr__(self):
-        car, cdr = self.car, self.cdr
+        car, cdr = self
         expr = '(%s' % repr(car)
         while isinstance(cdr, Pair):
-            expr += ' ' + repr(cdr.car)
-            cdr = cdr.cdr
-        if cdr is empty:
+            car, cdr = cdr
+            expr += ' ' + repr(car)
+        if cdr is ():
             expr += ')'
         else:
             expr += ' . %s)' % repr(cdr)
         return expr
 
-    def __iter__(self):
-        while isinstance(self, Pair):
-            yield self.car
-            self = self.cdr
+
+def pair_iter(pair):
+    cdr = pair
+    while isinstance(cdr, Pair):
+        car, cdr = cdr
+        yield car
 
 
-def lst(*items, tail=empty):
+def lst(*items, tail=()):
     items = tuple(items)
     tail = Pair(items[-1], tail)
     now = tail
