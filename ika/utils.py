@@ -10,21 +10,22 @@ def true(*x):
     return False
 
 
-from .struct import Pair, empty
+from .struct import Pair
 
 
 def release(x):
     stack = []
     while True:
         if isinstance(x, Pair):
-            if isinstance(x.car, Pair):
-                stack.append(x.cdr)
-                x = x.car
+            car, cdr = x
+            if isinstance(car, Pair):
+                stack.append(cdr)
+                x = car
             else:
-                yield x.car
-                x = x.cdr
+                yield car
+                x = cdr
         else:
-            if x is not empty:
+            if x is not ():
                 yield x
             if stack:
                 x = stack.pop()
