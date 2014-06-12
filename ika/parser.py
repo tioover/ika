@@ -47,4 +47,4 @@ List.grammar = [
 
 
 def parser(string):
-    return parse(string, expr(), comment=(';', restline))
+    return parse(string, [some(expr()), re.compile(r'\s*')], comment=(';', restline))

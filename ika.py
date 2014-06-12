@@ -7,7 +7,11 @@ def main():
     print(';; ika 1*10^-42')
     eval_ = evaluator()
     while True:
-        eval_(parser(input('; >> ')))
+        for expr in parser(input('; >> ')):
+            eval_(expr)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, EOFError):
+        exit()
