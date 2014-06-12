@@ -18,23 +18,43 @@ def car_is(*name):
     return wrap
 
 
-def rtn(st, pc):
-    st.parent.values.append(st.values.pop())
-    return st.parent, st.rtn
+def rtn(env, pc, values):
+    assert values[1] == ()
+    pc, rtn_values = env.rtn
+    return env.parent, pc, (values[0], rtn_values)
 
 
-class Status:
-    ''' Status tree. '''
+class Ref:
+    def __init__(self, value):
+        self.value = value
+
+
+class Env:
     def __init__(self, parent=None):
         self.parent = parent
-        self.env = {}
-        self.values = []
-        self.rtn = None
+        self.data = {}
+        self.rtn = (None, None)
 
+    def __getitem__(self, k):
+        return self.data[k].value
 
-class IR(list):
-    def rtn(self):
-        self.append(rtn)
+    def __setitem__(self, k, v):
+        self.data[k] = Ref(v)
+
+    def set_ref(self, k, v):
+        ref = self.get_ref(k)
+        if ref is not None:
+            ref.value = v
+        else:
+            raise NameError('%s is not defined.' % k)
+
+    def get_ref(self, k, default=None):
+        st = self
+        while st:
+            if k in st.data:
+                return st.data[k]
+            st = st.parent
+        return None
 
 
 def sign(test):
@@ -46,32 +66,7 @@ def sign(test):
 
 def register(handler):
     def wrap(expr, ir):
-        compiled = handler(expr, ir)
-        ir.append(compiled)
-        return compiled
+        command = handler(expr, ir)
+        ir.append(command)
+        return command
     return wrap
-
-
-def normal(f):
-    def instruction(st, pc):
-        st.values.append(f(st, pc))
-        return st, pc+1
-    return instruction
-
-
-def compiler(expr):
-    ir = IR()
-    compile(expr, ir)
-
-    def execute(st, cont):
-        # print('Expr:')
-        # print(expr)
-        # print('Instruction:')
-        # for i, item in enumerate(ir):
-            # print(i, item)
-        pc = 0  # program counter
-        while pc < len(ir):
-            # print('DEBUG: ', pc, st.values, ir[pc])
-            st, pc = ir[pc](st, pc)
-        return cont(st.values.pop())
-    return execute

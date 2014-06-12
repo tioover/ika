@@ -1,11 +1,6 @@
 import re
-from pypeg import parse, restline, some
-from .struct.types import String, Identifier, Float
-from .struct.pair import Empty, Pair, lst
-
-
-class Number(int):
-    pass
+from pypeg import parse, restline, some, omit
+from .struct import String, Identifier, Number, Float, Pair, Empty, empty
 
 
 class List:
@@ -13,12 +8,16 @@ class List:
         tail = thing.pop()
         if not thing:
             return tail
-        return lst(*thing, tail=tail)
+        while thing:
+            tail = Pair(thing.pop(), tail)
+        return tail
 
 
 class Quote:
     def __new__(cls, obj):
-        return lst(Identifier('quote'), obj)
+        if obj is empty:
+            return empty
+        return Pair('quote', Pair(obj))
 
 
 class Vector:
@@ -28,9 +27,10 @@ class Vector:
 
 expr = lambda: [Float, Number, String, Identifier, List, Quote, Vector]
 
+
 # Grammar Rule
 Empty.grammar = None
-Identifier.grammar = re.compile(r'[\w!@$%^&\.\*_+-=~]+')
+Identifier.grammar = re.compile(r'(?!\d|\.\s)[\w!@$%^&\.\*_+-=~]+')
 String.grammar = '"', re.compile(r'(\\"|[^"])*'), '"'
 Number.grammar = re.compile(r'\d+')
 Float.grammar = re.compile(r'\d+\.\d+')
@@ -38,7 +38,7 @@ Quote.grammar = "'", expr()
 Vector.grammar = '#', List
 list_content = [
     (some(expr()),  # list item
-        [('.', expr()), Empty]),  # tail item
+        [(omit('.'), expr()), Empty]),  # tail item
     Empty, ]
 List.grammar = [
     ('(', list_content, ')'),
@@ -47,4 +47,4 @@ List.grammar = [
 
 
 def parser(string):
-    return parse(string, expr(), comment=(';', restline))
+    return parse(string, [some(expr()), re.compile(r'\s*')], comment=(';', restline))

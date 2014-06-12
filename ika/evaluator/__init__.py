@@ -1,83 +1,114 @@
-from ..struct.pair import Pair, empty
-from ..struct.function import Function
-from ..struct.types import Identifier
-from .backend import Status, sign, register, normal, car_is, compile, compiler
+from ika.struct.types import Cont
+from ..struct import Pair, Identifier, Function, empty
+from .backend import Env, sign, register, car_is, compile, rtn
+from . import instruction
 
 
 @sign(lambda e: isinstance(e, Identifier))
 @register
 def name(expr, ir):
-    @normal
-    def obj(st, pc):
-        while st is not None:
-            if expr in st.env:
-                return st.env[expr]
-            st = st.parent
-    return obj
+    return instruction.name, (expr,)
 
 
 @sign(lambda e: not isinstance(e, Pair))
 @register
 def self_evaluator(expr, ir):
-    @normal
-    def obj(st, pc):
-        return expr
-    return obj
+    return instruction.self_evaluator, (expr,)
+
+
+@sign(car_is('define'))
+@register
+def definition(expr, ir):
+    key = expr.cdr.car
+    ir.append((instruction.define_empty, (key,)))
+    value = expr.cdr.cdr.car
+    compile(value, ir)
+    return instruction.set_value, (key,)
+
+
+@sign(car_is('set!'))
+@register
+def assign(expr, ir):
+    key = expr.cdr.car
+    value = expr.cdr.cdr.car
+    compile(value, ir)
+    return instruction.set_value, (key,)
+
+
+@sign(car_is('begin'))
+@register
+def begin(expr, ir):
+    expr = expr.cdr
+    n = 0
+    for e in expr:
+        compile(e, ir)
+        n += 1
+    return instruction.begin, (n,)
+
+
+@sign(car_is('call/cc'))
+def callcc(expr, ir):
+    ir.append((instruction.callcc, ()))
+    compile(expr.cdr.car, ir)
+    ir.append((instruction.apply, (ir, 1)))
 
 
 @sign(car_is('lambda'))
-def _lambda(expr, ir):
+def lambda_(expr, ir):
     pc = len(ir)
     ir.append(None)  # Placeholder
 
     args = expr.cdr.car
-    body = expr.cdr.cdr.car
+    body = expr.cdr.cdr
     func = Function(args, pc+1)
-    compile(body, ir)
-    ir.rtn()
+
+    compile(Pair('begin', body), ir)
+    ir.append((rtn, ()))
     i = len(ir)  # skip function body.
 
-    def function_obj(st, pc):
-        st.values.append(func)
-        return st, i
-
-    ir[pc] = function_obj
-
-
-def args_bind(env, formal, actual):
-    while True:
-        if isinstance(formal, Pair):
-            env[formal.car] = actual.car
-            formal = formal.cdr
-            actual = actual.cdr
-        elif formal is empty:
-            break
-        else:
-            env[formal] = actual
+    ir[pc] = (instruction.lambda_, (i, body, func))
 
 
 @sign(lambda e: True)
+@register
 def application(expr, ir):
     operator = expr.car
     operand = expr.cdr
 
-    for i, e in enumerate(operand):
+    unbound = 0
+    for e in operand:
         compile(e, ir)
-
-    def apply(st, pc):
-        args = empty
-        for j in range(i+1):
-            args = Pair(st.values.pop(), args)
-        st, pc = ir[pc+1](st, pc)
-        func = st.values.pop()
-        st = Status(st)
-        st.rtn = pc+1
-        args_bind(st.env, func.args, args)
-        return st, func.pc
-
-    ir.append(apply)
+        unbound += 1
     compile(operator, ir)
+    return instruction.apply, (ir, unbound)
 
 
-def eval(expr, env, cont=print):
-    compiler(expr)(env, cont)
+def output(expr):
+    if expr is not empty:
+        print(expr)
+
+
+def evaluator(cont=output):
+    ir = []
+    env_ = Env()
+
+    def eval_(expr):
+        pc = len(ir)
+        env = env_
+        values = ()
+
+        if expr is not None:
+            compile(expr, ir)
+        ir.append((rtn, ()))
+        while True:
+            function, arguments = ir[pc]
+            # print(pc, values, function)
+            if function is rtn and env.parent is None:
+                break
+            elif function is instruction.self_evaluator:
+                pc += 1
+                values = (arguments[0], values)
+            else:
+                env, pc, values = function(env, pc, values, *arguments)
+        return cont(values[0])
+    return eval_
