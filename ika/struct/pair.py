@@ -1,4 +1,6 @@
-class Pair(tuple):
+from .types import IkaType
+
+class Pair(IkaType, tuple):
     def __repr__(self):
         car, cdr = self
         expr = '(%s' % repr(car)

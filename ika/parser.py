@@ -1,6 +1,6 @@
 import re
 from pypeg import parse, restline, some, omit
-from .struct import String, Identifier, Number, Float, Pair
+from .struct import String, Identifier, Number, Float, Pair, IkaType
 
 
 class Empty:
@@ -9,25 +9,25 @@ class Empty:
 
 
 class List:
-    def __new__(cls, thing):
-        tail = thing.pop()
-        if not thing:
+    def __new__(cls, li):
+        tail = li.pop()
+        if not li:
             return tail
-        while thing:
-            tail = Pair((thing.pop(), tail))
+        while li:
+            tail = Pair((li.pop(), tail))
         return tail
 
 
 class Quote:
-    def __new__(cls, obj):
-        if obj is ():
+    def __new__(cls, x: IkaType):
+        if x is ():
             return ()
-        return Pair(('quote', Pair(obj)))
+        return Pair((Identifier('quote'), x))
 
 
 class Vector:
-    def __new__(cls, obj):
-        return Pair((Identifier('vector'), obj))
+    def __new__(cls, x: IkaType):
+        return Pair((Identifier('vector'), x))
 
 
 expr = lambda: [Float, Number, String, Identifier, List, Quote, Vector]
@@ -51,5 +51,5 @@ List.grammar = [
     ('{', list_content, '}'), ]
 
 
-def parser(string):
+def parser(string) -> IkaType:
     return parse(string, [some(expr()), re.compile(r'\s*')], comment=(';', restline))

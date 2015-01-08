@@ -3,7 +3,7 @@ line = []
 add = lambda *x: line.append(x)
 
 
-def compile(expr, ir):
+def compiler(expr, ir):
     for cond, handler in line:
         if cond(expr):
             return handler(expr, ir)

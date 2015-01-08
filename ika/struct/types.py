@@ -1,17 +1,21 @@
-class Float(float):
+class IkaType:
     pass
 
 
-class Number(int):
+class Float(IkaType, float):
     pass
 
 
-class String(str):
+class Number(IkaType, int):
+    pass
+
+
+class String(IkaType, str):
     def __repr__(self):
         return '"%s"' % self
 
 
-class Identifier(str):
+class Identifier(IkaType, str):
     def __repr__(self):
         return self
 
@@ -20,7 +24,7 @@ class Quote:
     pass
 
 
-class Function:
+class Function(IkaType):
     def __init__(self, args, pc):
         self.args = args
         self.pc = pc

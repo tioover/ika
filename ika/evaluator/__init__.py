@@ -1,17 +1,17 @@
 from ..struct import Pair, Identifier, Function
-from .backend import Env, sign, register, car_is, compile, rtn
+from .backend import Env, sign, register, car_is, compiler, rtn
 from . import instruction
 
 
 @sign(lambda e: isinstance(e, Identifier))
 @register
-def name(expr, ir):
+def name(expr, _):
     return instruction.name, (expr,)
 
 
 @sign(lambda e: not isinstance(e, Pair))
 @register
-def self_evaluator(expr, ir):
+def self_evaluator(expr, _):
     return instruction.self_evaluator, (expr,)
 
 
@@ -21,7 +21,7 @@ def definition(expr, ir):
     key = expr[1][0]  # .cdr.car
     ir.append((instruction.define_empty, (key,)))
     value = expr[1][1][0]  # .cdr.cdr.car
-    compile(value, ir)
+    compiler(value, ir)
     return instruction.set_value, (key,)
 
 
@@ -30,7 +30,7 @@ def definition(expr, ir):
 def assign(expr, ir):
     key = expr[1][0]  # .cdr.car
     value = expr[1][1][0]  # .cdr.cdr.car
-    compile(value, ir)
+    compiler(value, ir)
     return instruction.set_value, (key,)
 
 
@@ -41,7 +41,7 @@ def begin(expr, ir):
     n = 0
     while expr:
         e, expr = expr
-        compile(e, ir)
+        compiler(e, ir)
         n += 1
     return instruction.begin, (n,)
 
@@ -49,7 +49,7 @@ def begin(expr, ir):
 @sign(car_is('call/cc'))
 def callcc(expr, ir):
     ir.append((instruction.callcc, ()))
-    compile(expr[1][0], ir)
+    compiler(expr[1][0], ir)
     ir.append((instruction.apply, (ir, 1)))
 
 
@@ -61,7 +61,7 @@ def lambda_(expr, ir):
     args, body = expr[1]
     func = Function(args, pc+1)
 
-    compile(Pair(('begin', body)), ir)
+    compiler(Pair(('begin', body)), ir)
     ir.append((rtn, ()))
     i = len(ir)  # skip function body.
 
@@ -76,9 +76,9 @@ def application(expr, ir):
     unbound = 0
     while operand:
         e, operand = operand
-        compile(e, ir)
+        compiler(e, ir)
         unbound += 1
-    compile(operator, ir)
+    compiler(operator, ir)
     return instruction.apply, (ir, unbound)
 
 
@@ -87,17 +87,17 @@ def output(expr):
         print(expr)
 
 
-def evaluator(cont=output):
+def evaluator_maker(cont=output):
     ir = []
     env_ = Env()
 
-    def eval_(expr):
+    def evaluator(expr):
         pc = len(ir)
         env = env_
         values = ()
 
         if expr is not None:
-            compile(expr, ir)
+            compiler(expr, ir)
         ir.append((rtn, ()))
         while True:
             function, arguments = ir[pc]
@@ -110,4 +110,4 @@ def evaluator(cont=output):
             else:
                 env, pc, values = function(env, pc, values, *arguments)
         return cont(values[0])
-    return eval_
+    return evaluator

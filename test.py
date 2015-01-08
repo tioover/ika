@@ -1,12 +1,12 @@
 import unittest
 import logging
 from ika.parser import parser
-from ika.evaluator import evaluator
+from ika.evaluator import evaluator_maker
 from ika.struct import Function
 from ika.utils import id
 
 
-eval_ = evaluator(id)
+eval_ = evaluator_maker(id)
 
 
 def e(string):

@@ -1,6 +1,6 @@
-from .types import Function, Quote, Float, Identifier, String, Number
+from .types import IkaType, Function, Quote, Float, Identifier, String, Number
 from .pair import Pair
 
 
 __all__ = ['Function', 'Quote', 'Float', 'Identifier', 'String',
-           'Number', 'Empty', 'Pair']
+           'Number', 'Empty', 'Pair', 'IkaType']

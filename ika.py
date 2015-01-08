@@ -1,14 +1,14 @@
 from ika.parser import parser
-from ika.evaluator import evaluator
+from ika.evaluator import evaluator_maker
 
 
 def main():
     import readline
     print(';; ika 1*10^-42')
-    eval_ = evaluator()
+    evaluator = evaluator_maker()
     while True:
         for expr in parser(input('; >> ')):
-            eval_(expr)
+            evaluator(expr)
 
 if __name__ == '__main__':
     try:
